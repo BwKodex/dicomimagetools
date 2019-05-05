@@ -1,0 +1,13 @@
+[run]
+branch = True
+omit =
+    .pytest_cache/*
+    .gitignore
+    */LICENSE.txt
+    Pipfile
+    Pipfile.lock
+    README.md
+    setup.py
+    *.egg-info/*
+    tests/*
+    .idea/*
