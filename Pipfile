@@ -5,11 +5,13 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
+dephell = "*"
 
 [packages]
 pydicom = "*"
 numpy = "*"
 scikit-image = "*"
+dephell-archive = "==0.1.3"
 
 [requires]
 python_version = "3.7"
