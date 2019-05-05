@@ -67,7 +67,7 @@ def test_roi_creation_point_z_has_value():
     assert roi.Center.z == 1.0
 
 
-def test_roi_creation_point_z_none_value():
+def test_roi_creation_point_y_none_value():
     point = Point(x=1.0, y=None, z=None)
     with pytest.raises(ValueError):
         Roi(center=point)
