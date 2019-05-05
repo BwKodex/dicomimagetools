@@ -5,7 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
-dephell = "*"
+dephell = {extras = ["full"],version = "*"}
 
 [packages]
 pydicom = "*"
