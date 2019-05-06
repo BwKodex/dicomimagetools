@@ -1,5 +1,5 @@
 from dicom_image_tools.helpers.point import Point
-from dicom_image_tools.roi import Roi
+from dicom_image_tools.roi.roi import Roi
 import pytest
 
 
