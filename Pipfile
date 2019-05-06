@@ -11,6 +11,7 @@ flake8 = "*"
 
 [packages]
 dicom-image-tools = {editable = true,path = "."}
+scipy = "*"
 
 [requires]
 python_version = "3.7"
