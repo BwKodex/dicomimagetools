@@ -56,21 +56,28 @@ class SquareRoi(Roi):
             raise ValueError((f'Too small ROI size specified. Both width ({width_pixels}) and height ({height_pixels}) '
                               f'must be at least 1 pixel'))
 
+        height_pixels = int(round((self.Height - pixel_size.y) / pixel_size.y))
+        if height_pixels < 0:
+            height_pixels = 0
+        width_pixels = int(round((self.Width - pixel_size.x) / pixel_size.x))
+        if width_pixels < 0:
+            width_pixels = 0
+
         self.UpperLeft: IntPoint = IntPoint(
-            x=int(round(self.Center.x - (width_pixels / 2))),
-            y=int(round(self.Center.y - (height_pixels / 2)))
+            x=int(np.floor(self.Center.x - (width_pixels / 2) + 0.5)),
+            y=int(np.floor(self.Center.y - (height_pixels / 2) + 0.5))
         )
         self.LowerLeft: IntPoint = IntPoint(
-            x=int(round(self.Center.x - (width_pixels / 2))),
-            y=int(round(self.Center.y + (height_pixels / 2)))
+            x=int(np.floor(self.Center.x - (width_pixels / 2) + 0.5)),
+            y=int(np.floor(self.Center.y + (height_pixels / 2) + 0.5))
         )
         self.UpperRight: IntPoint = IntPoint(
-            x=int(round(self.Center.x + (width_pixels / 2))),
-            y=int(round(self.Center.y - (height_pixels / 2)))
+            x=int(np.floor(self.Center.x + (width_pixels / 2) + 0.5)),
+            y=int(np.floor(self.Center.y - (height_pixels / 2) + 0.5))
         )
         self.LowerRight: IntPoint = IntPoint(
-            x=int(round(self.Center.x + (width_pixels / 2))),
-            y=int(round(self.Center.y + (height_pixels / 2)))
+            x=int(np.floor(self.Center.x + (width_pixels / 2) + 0.5)),
+            y=int(np.floor(self.Center.y + (height_pixels / 2) + 0.5))
         )
 
     def get_mean(self, image: np.ndarray) -> np.ndarray:
