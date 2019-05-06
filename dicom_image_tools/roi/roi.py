@@ -7,7 +7,7 @@ class Roi:
     Attributes
     ----------
     center : CenterPosition
-        The coordinates for the center position (x, y, and z) of the ROI
+        The coordinates for the center position (x-, y-, and z-index) of the ROI
     """
     def __init__(self, center: CenterPosition):
         if not isinstance(center, Point) and not isinstance(center, dict):
