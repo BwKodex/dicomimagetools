@@ -15,7 +15,8 @@ setup(
     install_requires=[
         'pydicom>=1.2.2',
         'numpy>=1.16.3',
-        'scikit-image>=0.15.0'
+        'scikit-image>=0.15.0',
+        'scipy'
     ],
     zip_safe=False
 )

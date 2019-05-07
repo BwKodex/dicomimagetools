@@ -6,9 +6,12 @@ verify_ssl = true
 [dev-packages]
 pytest = "*"
 coverage = "*"
+pytest-cov = "*"
+flake8 = "*"
 
 [packages]
 dicom-image-tools = {editable = true,path = "."}
+scipy = "*"
 
 [requires]
 python_version = "3.7"
