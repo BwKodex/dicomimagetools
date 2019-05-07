@@ -1,9 +1,10 @@
 import numpy as np
 from scipy.stats import sem
+from skimage import color
 import pytest
 
 from dicom_image_tools.helpers.voxel_data import VoxelData
-from dicom_image_tools.roi.square_roi import SquareRoi
+from dicom_image_tools.roi.square_roi import SquareRoi, VALID_COLOURS
 
 
 test_image = np.array(
@@ -56,14 +57,6 @@ def test_upper_left_outside():
     with pytest.raises(ValueError) as exc_info:
         SquareRoi(center=center, height=5, width=5, pixel_size=voxel_data)
     assert 'upper left corner' in str(exc_info.value)
-
-
-def test_unallowed_color():
-    center = dict( x=6, y=6, z=None)
-    voxel_data = VoxelData(x=1.0, y=1.0, z=None)
-    square_roi = SquareRoi(center=center, height=3, width=3, pixel_size=voxel_data)
-    with pytest.raises(ValueError):
-        square_roi.add_roi_to_image(image=test_image, roi_color="Not a real colour")
 
 
 def test_check_roi_placement_outside():
@@ -198,3 +191,35 @@ def test_get_standard_error_of_them_mean_too_big_roi_no_resize():
         square_roi.get_std_error_of_the_mean(image=test_image)
 
 
+def test_add_roi_to_image_unallowed_color():
+    center = dict( x=6, y=6, z=None)
+    voxel_data = VoxelData(x=1.0, y=1.0, z=None)
+    square_roi = SquareRoi(center=center, height=3, width=3, pixel_size=voxel_data)
+    with pytest.raises(ValueError):
+        square_roi.add_roi_to_image(image=test_image, roi_color="Not a real colour")
+
+
+def test_add_roi_to_image():
+    roi_color = 'SkyBlue'
+    expected = color.gray2rgb(test_image)
+    expected[4:8, 4:8] = VALID_COLOURS[roi_color]
+
+    center = dict(x=6, y=6, z=None)
+    voxel_data = VoxelData(x=1.0, y=1.0, z=None)
+    square_roi = SquareRoi(center=center, height=3, width=3, pixel_size=voxel_data)
+
+    image_with_roi = square_roi.add_roi_to_image(image=test_image, roi_color=roi_color)
+
+    assert image_with_roi.all() == expected.all()
+
+
+def test_get_roi_part_of_image():
+    expected = test_image[4:8, 4:8]
+
+    center = dict(x=6, y=6, z=None)
+    voxel_data = VoxelData(x=1.0, y=1.0, z=None)
+    square_roi = SquareRoi(center=center, height=3, width=3, pixel_size=voxel_data)
+
+    roi_part_of_image = square_roi.get_roi_part_of_image(image=test_image)
+
+    assert roi_part_of_image.all() == expected.all()
