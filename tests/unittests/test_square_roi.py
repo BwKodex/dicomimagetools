@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.stats import sem
 import pytest
 
 from dicom_image_tools.helpers.voxel_data import VoxelData
@@ -165,5 +166,35 @@ def test_get_sum_too_big_roi_no_resize():
     square_roi = SquareRoi(center=center, height=3, width=3, pixel_size=voxel_data, resize_too_big_roi=False)
 
     with pytest.raises(ValueError):
-        square_roi.get_stdev(image=test_image)
+        square_roi.get_sum(image=test_image)
+
+
+def test_get_standard_error_of_them_mean():
+    expected = sem(test_image[5:7 + 1, 5:7 + 1].flatten())
+
+    center = dict(x=6, y=6, z=None)
+    voxel_data = VoxelData(x=1.0, y=1.0, z=None)
+    square_roi = SquareRoi(center=center, height=3, width=3, pixel_size=voxel_data)
+
+    assert expected == square_roi.get_std_error_of_the_mean(image=test_image)
+
+
+def test_get_standard_error_of_them_mean_too_big_roi_resize():
+    expected = sem(test_image[10:12 + 1, 10:12 + 1].flatten())
+
+    center = dict(x=12, y=12, z=None)
+    voxel_data = VoxelData(x=1.0, y=1.0, z=None)
+    square_roi = SquareRoi(center=center, height=5, width=5, pixel_size=voxel_data, resize_too_big_roi=True)
+
+    assert square_roi.get_std_error_of_the_mean(image=test_image) == expected
+
+
+def test_get_standard_error_of_them_mean_too_big_roi_no_resize():
+    center = dict(x=12, y=12, z=None)
+    voxel_data = VoxelData(x=1.0, y=1.0, z=None)
+    square_roi = SquareRoi(center=center, height=3, width=3, pixel_size=voxel_data, resize_too_big_roi=False)
+
+    with pytest.raises(ValueError):
+        square_roi.get_std_error_of_the_mean(image=test_image)
+
 
