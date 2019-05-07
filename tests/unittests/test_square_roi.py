@@ -121,13 +121,13 @@ def test_get_stdev():
 
 
 def test_get_stdev_too_big_roi_resize():
-    expected_mean = 0.5
+    expected_stdev = 0.5
 
     center = dict(x=12, y=12, z=None)
     voxel_data = VoxelData(x=1.0, y=1.0, z=None)
     square_roi = SquareRoi(center=center, height=5, width=5, pixel_size=voxel_data, resize_too_big_roi=True)
 
-    assert expected_mean == square_roi.get_stdev(image=test_image)
+    assert expected_stdev == square_roi.get_stdev(image=test_image)
 
 
 def test_get_stdev_too_big_roi_no_resize():
@@ -137,3 +137,33 @@ def test_get_stdev_too_big_roi_no_resize():
 
     with pytest.raises(ValueError):
         square_roi.get_stdev(image=test_image)
+
+
+def test_get_sum():
+    expected_stdev = sum(np.sum(test_image[5:7 + 1, 5:7 + 1], axis=1))
+
+    center = dict(x=6, y=6, z=None)
+    voxel_data = VoxelData(x=1.0, y=1.0, z=None)
+    square_roi = SquareRoi(center=center, height=3, width=3, pixel_size=voxel_data)
+
+    assert expected_stdev == sum(square_roi.get_sum(image=test_image))
+
+
+def test_get_sum_too_big_roi_resize():
+    expected = 46
+
+    center = dict(x=12, y=12, z=None)
+    voxel_data = VoxelData(x=1.0, y=1.0, z=None)
+    square_roi = SquareRoi(center=center, height=5, width=5, pixel_size=voxel_data, resize_too_big_roi=True)
+
+    assert expected == sum(square_roi.get_sum(image=test_image))
+
+
+def test_get_sum_too_big_roi_no_resize():
+    center = dict(x=12, y=12, z=None)
+    voxel_data = VoxelData(x=1.0, y=1.0, z=None)
+    square_roi = SquareRoi(center=center, height=3, width=3, pixel_size=voxel_data, resize_too_big_roi=False)
+
+    with pytest.raises(ValueError):
+        square_roi.get_stdev(image=test_image)
+
