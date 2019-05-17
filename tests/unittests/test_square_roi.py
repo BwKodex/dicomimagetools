@@ -59,6 +59,14 @@ def test_upper_left_outside():
     assert 'upper left corner' in str(exc_info.value)
 
 
+def test_upper_left_outside_resize():
+    center = dict(x=1, y=1, z=None)
+    voxel_data = VoxelData(x=1.0, y=1.0, z=None)
+    square_roi = SquareRoi(center=center, height=5, width=5, pixel_size=voxel_data, resize_too_big_roi=True)
+    assert square_roi.UpperLeft.x == 0
+    assert square_roi.UpperLeft.y == 0
+
+
 def test_check_roi_placement_outside():
     center = dict(x=100, y=100, z=None)
     voxel_data = VoxelData(x=1.0, y=1.0, z=None)

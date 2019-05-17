@@ -4,10 +4,12 @@ from ..helpers.point import Point, CenterPosition
 class Roi:
     """ A class to manage ROIs in DICOM images
 
-    Attributes
-    ----------
-    center : CenterPosition
-        The coordinates for the center position (x-, y-, and z-index) of the ROI
+    Args:
+        center : The coordinates for the center position (x-, y-, and z-index) of the ROI
+
+    Attributes:
+        Center : The coordinates for the center position (x-, y-, and z-index) of the ROI
+
     """
     def __init__(self, center: CenterPosition):
         if not isinstance(center, Point) and not isinstance(center, dict):
