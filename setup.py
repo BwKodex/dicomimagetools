@@ -11,12 +11,13 @@ setup(
     classifiers=[
         'Programming Language :: Python :: 3.7'
     ],
-    packages=find_packages(),
+    packages=find_packages(where='src'),
+    package_dir={'': 'src'},
     install_requires=[
         'pydicom>=1.2.2',
         'numpy>=1.16.3',
         'scikit-image>=0.15.0',
-        'scipy'
+        'scipy>=1.3.0'
     ],
     zip_safe=False
 )

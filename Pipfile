@@ -10,8 +10,7 @@ pytest-cov = "*"
 flake8 = "*"
 
 [packages]
-dicom-image-tools = {editable = true,path = "."}
-scipy = "*"
+dicom-image-tools = {editable = true, path = "."}
 
 [requires]
 python_version = "3.7"
