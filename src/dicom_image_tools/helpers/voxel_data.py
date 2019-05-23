@@ -4,17 +4,12 @@ from typing import Optional
 
 @dataclass
 class VoxelData:
-    """
-    A class for managing voxel/pixel data for DICOM images
+    """ A class for managing voxel/pixel data for DICOM images
 
-    Attributes
-    ----------
-    x : float
-        The voxel/pixel x-dimension in mm
-    y : float
-        The voxel/pixel y-dimension in mm
-    z : Optional[float]
-        The voxel/pixel z-dimension in mm
+    Attributes:
+        x: The voxel/pixel x-dimension in mm
+        y: The voxel/pixel y-dimension in mm
+        z: The voxel/pixel z-dimension in mm
     """
     x: float
     y: float
