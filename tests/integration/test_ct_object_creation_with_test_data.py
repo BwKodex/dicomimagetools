@@ -31,7 +31,7 @@ def test_ct_series_import_image_volume(example_data_path_fixture):
     assert ct_series.mA == [520]
     assert ct_series.SlicePosition == [-7.5]
     assert ct_series.ImageVolume.shape == (512, 512, 1)
-    
+
 
 def test_ct_series_pixel_data_removed_from_complete_metadata(example_data_path_fixture):
     ct_series = CtSeries(series_instance_uid='1.2.826.0.1.3680043.8.971.31305363770056566540494760179678687617')
@@ -39,4 +39,4 @@ def test_ct_series_pixel_data_removed_from_complete_metadata(example_data_path_f
     ct_series.import_image_volume()
 
     with pytest.raises(KeyError):
-        ct_series.CompleteMetadata[0][0x7FE00010]
+        tmp = ct_series.CompleteMetadata[0][0x7FE00010]
