@@ -46,3 +46,21 @@ def test_ct_series_pixel_data_removed_from_complete_metadata(example_data_path_f
 
     with pytest.raises(KeyError):
         tmp = ct_series.CompleteMetadata[0][0x7FE00010]
+
+
+def test_ct_series_get_patient_mask_wrong_threshold_type(example_data_path_fixture):
+    ct_series = CtSeries(series_instance_uid='1.2.826.0.1.3680043.8.971.31305363770056566540494760179678687617')
+    ct_series.add_file(file=example_data_path_fixture['ct'] / 'serie1' / '1')
+    ct_series.import_image_volume()
+
+    with pytest.raises(TypeError):
+        ct_series.get_patient_mask(threshold='WrongThresholdType', remove_table=False)
+
+
+def test_ct_series_get_patient_mask(example_data_path_fixture):
+    ct_series = CtSeries(series_instance_uid='1.2.826.0.1.3680043.8.971.31305363770056566540494760179678687617')
+    ct_series.add_file(file=example_data_path_fixture['ct'] / 'serie1' / '1')
+    ct_series.import_image_volume()
+    ct_series.get_patient_mask(threshold=-500, remove_table=False)
+
+    assert ct_series.MaskSuccess is True
