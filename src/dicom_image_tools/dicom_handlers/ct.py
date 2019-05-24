@@ -115,7 +115,7 @@ class CtSeries(DicomSeries):
             self.VoxelData.append(VoxelData(x=float(dcm.PixelSpacing[1]), y=float(dcm.PixelSpacing[0]),
                                             z=float(dcm.SliceThickness)))
 
-            # Remove pixel data part of dcm
+            # Remove pixel data part of dcm to decrease memory used for the object
             try:
                 del dcm[0x7FE00010]
             except Exception as e:
