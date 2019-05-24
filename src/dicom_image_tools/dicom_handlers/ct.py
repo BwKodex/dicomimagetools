@@ -208,7 +208,7 @@ class CtSeries(DicomSeries):
         """
         log.info("Calculating phantom geometrical offset")
 
-        for ind, mass_center in enumerate(self.PatientMAssCenterImage):
+        for ind, mass_center in enumerate(self.PatientMassCenterImage):
             if 'ImagePositionPatient' in self.CompleteMetadata[ind]:
                 geometrical_center = (round(mass_center.y, 1), round(mass_center.x, 1))
                 image_position = (float(self.CompleteMetadata[ind].ImagePositionPatient[0]),
