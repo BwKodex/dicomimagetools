@@ -20,6 +20,12 @@ def test_ct_series_add_file(example_data_path_fixture):
     assert len(ct_series.FilePaths) == 1
 
 
+def test_ct_series_raises_error_on_adding_file_from_other_series(example_data_path_fixture):
+    ct_series = CtSeries(series_instance_uid='WrongSeriesInstanceUid')
+    with pytest.raises(ValueError):
+        ct_series.add_file(file=example_data_path_fixture['ct'] / 'serie1' / '1')
+
+
 def test_ct_series_import_image_volume(example_data_path_fixture):
     ct_series = CtSeries(series_instance_uid='1.2.826.0.1.3680043.8.971.31305363770056566540494760179678687617')
     ct_series.add_file(file=example_data_path_fixture['ct'] / 'serie1' / '1')
