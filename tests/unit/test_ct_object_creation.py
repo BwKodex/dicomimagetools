@@ -1,5 +1,4 @@
 from dicom_image_tools.dicom_handlers.ct import CtSeries
-import pytest
 
 
 def test_ct_series_creation():
