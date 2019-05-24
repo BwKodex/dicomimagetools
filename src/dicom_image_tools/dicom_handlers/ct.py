@@ -20,6 +20,26 @@ log = logging.getLogger(__name__)
 class CtSeries(DicomSeries):
     """ A class to manage DICOM files from CT connected by a Series Instance UID
 
+    Args:
+        series_instance_uid: Series instance UID of the object to be created
+
+    Attributes:
+        kV: Kilo voltage used for each image
+        mA: Tube current used per image in mA
+        SlicePosition: List of slice locations (in mm)
+        Manufacturer: The name of the manufacturer of the CT machine
+        Mask: A mask covering the patient, created in the get_patient_mask method
+        MaskSuccess: A boolean saying if the patient mask creationg was successful or not
+        PatientClipped: A boolean specifying if the masked patient contour touches the any of the edges of the image
+                        volume
+        PatientMassCenterImage: A list of the masked patient mass center for each image
+        PatientMassCenterVolume: The masked patient volume mass center
+        PatientGeometricalOffset: The patient volume geometrical offset from the scanner isocenter
+        MeanHuPatientImage: Mean HU value of the masked patient for each image
+        MedianHuPatientImage: Median HU value of the masked patient for each image
+        MeanHuPatientVolume: Mean HU value of the masked patient volume
+        MedianHuPatientVolume: Median HU value of the masked patient volume
+
     """
     def __init__(self, series_instance_uid: str):
         super().__init__(series_instance_uid=series_instance_uid)
@@ -37,10 +57,10 @@ class CtSeries(DicomSeries):
         self.PatientMassCenterImage: Optional[List[PatientMassCenter]] = None
         self.PatientMassCenterVolume: Optional[PatientMassCenter] = None
         self.PatientGeometricalOffset: Optional[PatientGeometricalOffset] = None
-        self.MeanHuImage: Optional[List[float]] = None
-        self.MedianHuImage: Optional[List[float]] = None
-        self.MeanHuVolume: Optional[float] = None
-        self.MedianHuVolume: Optional[float] = None
+        self.MeanHuPatientImage: Optional[List[float]] = None
+        self.MedianHuPatientImage: Optional[List[float]] = None
+        self.MeanHuPatientVolume: Optional[float] = None
+        self.MedianHuPatientVolume: Optional[float] = None
 
     def add_file(self, file: Path, dcm: Optional[FileDataset] = None) -> None:
         """ Add a file to the objects list of files.
@@ -66,6 +86,10 @@ class CtSeries(DicomSeries):
         """
         # Remove any previously imported image volume
         self.ImageVolume = None
+        self.kV = []
+        self.mA = []
+        self.SlicePosition = []
+        self.PatientMassCenterImage = []
 
         for ind, fp in enumerate(self.FilePaths):
             dcm = pydicom.dcmread(fp=str(fp.absolute()))
@@ -75,16 +99,18 @@ class CtSeries(DicomSeries):
                 self.ImageVolume = np.empty((px.shape[0], px.shape[1], len(self.FilePaths)))
 
             self.ImageVolume[:, :, ind] = px
-            self.kV.append(dcm.KVP)
+            self.kV.append(float(dcm.KVP))
 
             if 'XRayTubeCurrent' in dcm:
-                self.mA.append(dcm.XRayTubeCurrent)
+                self.mA.append(float(dcm.XRayTubeCurrent))
             elif 'XRayTubeCurrentInmA' in dcm:
-                self.mA.append(dcm.XRayTubeCurrentInmA)
+                self.mA.append(float(dcm.XRayTubeCurrentInmA))
             elif 'XRayTubeCurrentInuA' in dcm:
-                self.mA.append(dcm.XRayTubeCurrentInuA / 1000)
+                self.mA.append(float(dcm.XRayTubeCurrentInuA) / 1000)
             else:
                 self.mA.append(None)
+
+            self.SlicePosition.append(float(dcm.SliceLocation))
 
             self.VoxelData.append(VoxelData(x=float(dcm.PixelSpacing[1]), y=float(dcm.PixelSpacing[0]),
                                             z=float(dcm.SliceThickness)))
