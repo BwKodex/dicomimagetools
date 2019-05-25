@@ -8,7 +8,7 @@ from typing import List, Optional
 from ..helpers.voxel_data import VoxelData
 
 
-log = logging.getLogger('DicomImageTools')
+log = logging.getLogger(__name__)
 
 
 class DicomSeries:
