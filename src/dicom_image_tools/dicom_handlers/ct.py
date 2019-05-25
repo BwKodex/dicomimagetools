@@ -199,6 +199,22 @@ class CtSeries(DicomSeries):
         except Exception as e:
             log.warning("Could not calculate patient geometrical offset", e)
 
+        # Check if patient is clipped
+        self.PatientClipped = any([
+            np.sum(self.Mask[0, :, :]) > 0,
+            np.sum(self.Mask[-1, :, :]) > 0,
+            np.sum(self.Mask[:, 0, :]) > 0,
+            np.sum(self.Mask[:, -1, :]) > 0,
+        ])
+
+        # Calculate mean and median values
+        tmp_masked_image = np.ma.array(self.ImageVolume, mask=np.logical_not(self.Mask))
+
+        self.MeanHuPatientImage = list(tmp_masked_image.mean(axis=(0, 1)))
+        self.MedianHuPatientImage = list(np.ma.median(tmp_masked_image, axis=(0, 1)))
+        self.MeanHuPatientVolume = tmp_masked_image.mean(axis=None)
+        self.MedianHuPatientVolume = np.ma.median(tmp_masked_image, axis=None)
+
     def _get_patient_geometrical_offset(self):
         """ Calculate the patient/phantom geometrical offset from isocenter
 
@@ -217,6 +233,9 @@ class CtSeries(DicomSeries):
                 if self.Manufacturer.upper() in ['SIEMENS', 'PHILIPS']:
                     # Recalculate image position due to incorrect specifications
                     image_position[1] += float(self.CompleteMetadata[ind].TableHeight)
+
+                if self.PatientGeometricalOffset is None:
+                    self.PatientGeometricalOffset = []
 
                 self.PatientGeometricalOffset.append(PatientGeometricalOffset(
                     x=float(image_position[0]) + geometrical_center[1] + self.VoxelData[ind].x,
