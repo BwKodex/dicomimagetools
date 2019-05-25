@@ -1,3 +1,4 @@
+from numpy import floor
 from pathlib import Path
 import pytest
 
@@ -15,7 +16,7 @@ def example_data_path_fixture():
 
 def test_ct_series_add_file(example_data_path_fixture):
     ct_series = CtSeries(series_instance_uid='1.2.826.0.1.3680043.8.971.31305363770056566540494760179678687617')
-    ct_series.add_file(file=example_data_path_fixture['ct'] / 'serie1' / '1')
+    ct_series.add_file(file=example_data_path_fixture['ct'] / 'GE' / 'serie1' / '1')
 
     assert len(ct_series.FilePaths) == 1
 
@@ -23,7 +24,7 @@ def test_ct_series_add_file(example_data_path_fixture):
 def test_ct_series_raises_error_on_adding_file_from_other_series(example_data_path_fixture):
     ct_series = CtSeries(series_instance_uid='WrongSeriesInstanceUid')
     with pytest.raises(ValueError):
-        ct_series.add_file(file=example_data_path_fixture['ct'] / 'serie1' / '1')
+        ct_series.add_file(file=example_data_path_fixture['ct'] / 'GE' / 'serie1' / '1')
 
 
 def test_ct_series_import_image_volume(example_data_path_fixture):
@@ -50,7 +51,7 @@ def test_ct_series_pixel_data_removed_from_complete_metadata(example_data_path_f
 
 def test_ct_series_get_patient_mask_wrong_threshold_type(example_data_path_fixture):
     ct_series = CtSeries(series_instance_uid='1.2.826.0.1.3680043.8.971.31305363770056566540494760179678687617')
-    ct_series.add_file(file=example_data_path_fixture['ct'] / 'serie1' / '1')
+    ct_series.add_file(file=example_data_path_fixture['ct'] / 'GE' / 'serie1' / '1')
     ct_series.import_image_volume()
 
     with pytest.raises(TypeError):
@@ -59,8 +60,24 @@ def test_ct_series_get_patient_mask_wrong_threshold_type(example_data_path_fixtu
 
 def test_ct_series_get_patient_mask(example_data_path_fixture):
     ct_series = CtSeries(series_instance_uid='1.2.826.0.1.3680043.8.971.31305363770056566540494760179678687617')
-    ct_series.add_file(file=example_data_path_fixture['ct'] / 'serie1' / '1')
+    ct_series.add_file(file=example_data_path_fixture['ct'] / 'GE' / 'serie1' / '1')
     ct_series.import_image_volume()
     ct_series.get_patient_mask(threshold=-500, remove_table=False)
 
     assert ct_series.MaskSuccess is True
+
+
+def test_ct_series_get_patient_mask_remove_table(example_data_path_fixture):
+    ct_series = CtSeries(series_instance_uid='1.2.826.0.1.3680043.8.971.31305363770056566540494760179678687617')
+    ct_series.add_file(file=example_data_path_fixture['ct'] / 'GE' / 'serie1' / '1')
+    ct_series.add_file(file=example_data_path_fixture['ct'] / 'GE' / 'serie1' / '2')
+    ct_series.import_image_volume()
+    ct_series.get_patient_mask(threshold=-500, remove_table=True)
+
+    assert ct_series.MaskSuccess is True
+    assert ct_series.Mask is not None
+    assert sum(ct_series.Mask.flat) > 0
+    assert ct_series.MaskSuccess is True
+    assert ct_series.PatientClipped is False
+    assert ct_series.MedianHuPatientVolume == 125.0
+    assert floor(ct_series.MeanHuPatientVolume) == 85.0
