@@ -29,7 +29,7 @@ def test_ct_series_raises_error_on_adding_file_from_other_series(example_data_pa
 
 def test_ct_series_import_image_volume(example_data_path_fixture):
     ct_series = CtSeries(series_instance_uid='1.2.826.0.1.3680043.8.971.31305363770056566540494760179678687617')
-    ct_series.add_file(file=example_data_path_fixture['ct'] / 'serie1' / '1')
+    ct_series.add_file(file=example_data_path_fixture['ct'] / 'GE' / 'serie1' / '1')
     ct_series.import_image_volume()
 
     assert len(ct_series.CompleteMetadata) == 1
@@ -42,7 +42,7 @@ def test_ct_series_import_image_volume(example_data_path_fixture):
 
 def test_ct_series_pixel_data_removed_from_complete_metadata(example_data_path_fixture):
     ct_series = CtSeries(series_instance_uid='1.2.826.0.1.3680043.8.971.31305363770056566540494760179678687617')
-    ct_series.add_file(file=example_data_path_fixture['ct'] / 'serie1' / '1')
+    ct_series.add_file(file=example_data_path_fixture['ct'] / 'GE' / 'serie1' / '1')
     ct_series.import_image_volume()
 
     with pytest.raises(KeyError):
