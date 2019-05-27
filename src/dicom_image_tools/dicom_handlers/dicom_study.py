@@ -1,4 +1,3 @@
-import logging
 import numpy as np
 from pathlib import Path
 import pydicom
@@ -6,9 +5,6 @@ from pydicom import FileDataset
 from typing import List, Optional
 
 from ..helpers.voxel_data import VoxelData
-
-
-log = logging.getLogger(__name__)
 
 
 class DicomSeries:
@@ -33,7 +29,8 @@ class DicomSeries:
 
         # Metadata
         self.SeriesInstanceUid: str = series_instance_uid
-        self.CompleteMetadata: List[FileDataset] = []
+        self.SeriesDescription: Optional[str] = None
+        self.CompleteMetadata: List[Optional[FileDataset]] = []
         self.VoxelData: List[VoxelData] = []
 
         self.ImageVolume: Optional[np.ndarray] = None
@@ -52,17 +49,19 @@ class DicomSeries:
             ValueError: if SeriesInstanceUID of the file is not the same as the SeriesInstanceUid attribute
 
         """
+        if any([True if obj == file else False for obj in self.FilePaths]):
+            # Return None since the file is alread in hte volume
+            return
+
         if dcm is None:
             dcm = pydicom.dcmread(fp=str(file.absolute()), stop_before_pixels=True)
 
-        if any([True if obj == file else False for obj in self.FilePaths]):
-            log.info('File already in object')
-            return
-
         if dcm.SeriesInstanceUID != self.SeriesInstanceUid:
             msg = f"Wrong SeriesInstanceUID. Expected: {self.SeriesInstanceUid}; Input: {dcm.SeriesInstanceUID}"
-            log.error(msg=msg)
             raise ValueError(msg)
+
+        if 'SeriesDescription' in dcm:
+            self.SeriesDescription = dcm.SeriesDescription
 
         self.FilePaths.append(file)
 
@@ -96,7 +95,7 @@ class DicomStudy:
         """ Add the DICOM file to the DicomStudy object after validating the study instance UID
 
         Args:
-            file: Path to where the file to be added is stored on disk
+            file: Path to where the file to be added is stored on disc
             dcm: The DICOM-file imported to a FileDataset object
 
         Raises:
@@ -116,9 +115,7 @@ class DicomStudy:
         try:
             index = [obj.SeriesInstanceUid for obj in self.Series].index(dcm.SeriesInstanceUID)
         except ValueError as e:
-            log.debug(f"Found new Series {dcm.SeriesInstanceUID}")
             self.Series.append(DicomSeries(dcm.SeriesInstanceUID))
             index = -1
 
         self.Series[index].add_file(file=file, dcm=dcm)
-        log.debug("File added to object")

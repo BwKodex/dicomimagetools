@@ -24,10 +24,11 @@ class CtSeries(DicomSeries):
         series_instance_uid: Series instance UID of the object to be created
 
     Attributes:
-        kV: Kilo voltage used for each image
+        kV: Tube voltage used for each image in kV
         mA: Tube current used per image in mA
         SlicePosition: List of slice locations (in mm)
         Manufacturer: The name of the manufacturer of the CT machine
+        ManufacturersModelName: The model name specified by the manufacturer as given in the DICOM file
         Mask: A mask covering the patient, created in the get_patient_mask method
         MaskSuccess: A boolean saying if the patient mask creationg was successful or not
         PatientClipped: A boolean specifying if the masked patient contour touches the any of the edges of the image
@@ -45,8 +46,9 @@ class CtSeries(DicomSeries):
         super().__init__(series_instance_uid=series_instance_uid)
         self.kV: Optional[List[float]] = None
         self.mA: Optional[List[Optional[float]]] = None
-        self.SlicePosition: Optional[List[float]] = None
+        self.SlicePosition: Optional[List[float]] = []
         self.Manufacturer: Optional[str] = None
+        self.ManufacturersModelName: Optional[str] = None
 
         # Image volume data
         self.Mask: Optional[np.ndarray] = None
@@ -65,7 +67,8 @@ class CtSeries(DicomSeries):
     def add_file(self, file: Path, dcm: Optional[FileDataset] = None) -> None:
         """ Add a file to the objects list of files.
 
-        First performs a check that the file is a valid DICOM file and that it is a CT file
+        First performs a check that the file is a valid DICOM file and that it is a CT file.
+        List properties are emptied to prevent mismatch between them, the FilePaths and SlicePosition
 
         Raises:
             ValueError: If supplied file is not a CT image
@@ -77,8 +80,29 @@ class CtSeries(DicomSeries):
         if dcm.Modality.upper() != "CT":
             raise ValueError(f"The supplied file is not a CT image. (supplied modality: {dcm.Modality}")
 
+        self.ImageVolume = None
+        self.kV = []
+        self.mA = []
+        self.PatientMassCenterImage = []
+        self.PatientMassCenterVolume = None
+        self.PatientGeometricalOffset = None
+        self.MeanHuPatientVolume = None
+        self.MeanHuPatientImage = []
+        self.MedianHuPatientVolume = None
+        self.MedianHuPatientImage = []
+        self.Mask = None
+        self.MaskSuccess = None
+        self.PatientClipped = None
+
         super().add_file(file=file, dcm=dcm)
         self.Manufacturer = dcm.Manufacturer
+        self.ManufacturersModelName = dcm.ManufacturerModelName
+        self.SlicePosition.append(float(dcm.SliceLocation))
+
+        # Reorder lists according to slice positions
+        file_order = [ind for ind in list(np.argsort(np.array(self.SlicePosition)))]
+        self.FilePaths = [self.FilePaths[ind] for ind in file_order]
+        self.SlicePosition = [self.SlicePosition[ind] for ind in file_order]
 
     def import_image_volume(self) -> None:
         """ Import the files in the CtVolume and insert them into the ImageVolumeProperty. Also add metadata for each
