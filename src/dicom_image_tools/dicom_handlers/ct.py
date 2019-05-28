@@ -8,7 +8,7 @@ from scipy.ndimage import center_of_mass
 from skimage import morphology
 from typing import List, Optional
 
-from .dicom_study import DicomSeries
+from .dicom_series import DicomSeries
 from ..helpers.pixel_data import get_pixel_array
 from ..helpers.voxel_data import VoxelData
 from ..helpers.patient_centering import PatientMassCenter, PatientGeometricalOffset
