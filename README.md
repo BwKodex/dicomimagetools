@@ -1,20 +1,33 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# Dicom Image Tools 
+The dicom image tools package was created for giving a framework handling DICOM image data. Adding functionality often used for programmatic image analysis.
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+The package is still in early development and more features will be added.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+# Install Dicom Image Tools
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+Install using pipenv by running:
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+``
+$ pipenv install dicom_image_tools
+``
+
+Install using pip by running:
+
+``
+$ pip install dicom_image_tools
+``
+
+Only **Python 3.7+** is supported.
+
+# Usage
+
+## Importing DICOM images
+There are two functions for importing DICOM images, ``import_dicom_file(file: pathlib.Path)`` and ``import_dicom_from_folder(folder: pathlib.Path, recursively: bool = True)``.
+
+The latter function has an optional input argument for specifying if the folder given should be searched for DICOM files recursively, default = ``True`` 
+
+Both will return the image/-s in ``DicomStudy`` objects, the ``import_dicom_from_folder`` function returns a dictionary with the _Study Instance UID_ as the _key_ and the corresponding ``DicomStudy`` object as _value_.
+
+You can then add additional files to the ``DicomStudy`` object through the ``DicomStudy.add_file`` which takes the file path as a ``pathlib.Path`` object as input.
+
+The ``DicomStudy.Series`` is a list of all series belonging to the study that has been imported. Each ``DicomStudy.Series`` item is an object containing the image/image volume and metadata for each image. The image/image volume is accessed through the ``ImageVolume`` attribute of the ``DicomStudy.Series`` item, and the metadata in the ``CompleteMetadata`` attribute.
