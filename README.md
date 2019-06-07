@@ -8,18 +8,24 @@ The package is still in early development and more features will be added.
 Install using pipenv by running:
 
 ``
-$ pipenv install dicom_image_tools
+$ pipenv install dicom-image-tools
 ``
 
 Install using pip by running:
 
 ``
-$ pip install dicom_image_tools
+$ pip install dicom-image-tools
 ``
 
 Only **Python 3.7+** is supported.
 
 # Usage
+
+When you've installed the package you import it as any other package using
+
+```python
+import dicom_image_tools
+```
 
 ## Importing DICOM images
 There are two functions for importing DICOM images, ``import_dicom_file(file: pathlib.Path)`` and ``import_dicom_from_folder(folder: pathlib.Path, recursively: bool = True)``.

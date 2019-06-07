@@ -5,7 +5,7 @@ README = (Path(__file__).parent / 'README.md').read_text()
 
 setup(
     name='dicom_image_tools',
-    version='19.5.0',
+    version='19.5.1',
     description='Python package for managing DICOM images from different modalities',
     long_description=README,
     long_description_content_type='text/markdown',
@@ -14,7 +14,7 @@ setup(
     author_email="josef@lundman.eu",
     license='MIT',
     classifiers=[
-        'License :: OSI Approved :: MIT License'
+        'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.7'
     ],
     packages=find_packages(where='src'),
