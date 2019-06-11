@@ -13,4 +13,4 @@ class VoxelData:
     """
     x: float
     y: float
-    z: Optional[float]
+    z: Optional[float] = None
