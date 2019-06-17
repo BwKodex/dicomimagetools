@@ -56,9 +56,11 @@ class DicomStudy:
 
         try:
             index = [obj.SeriesInstanceUid for obj in self.Series].index(dcm.SeriesInstanceUID)
-            self.Series[index].add_file(file=file, dcm=dcm)
         except ValueError:
             if dcm.Modality == "CT":
                 self.Series.append(CtSeries(series_instance_uid=dcm.SeriesInstanceUID))
             else:
                 self.Series.append(ProjectionSeries(file=file, dcm=dcm))
+            index = [obj.SeriesInstanceUid for obj in self.Series].index(dcm.SeriesInstanceUID)
+
+        self.Series[index].add_file(file=file, dcm=dcm)
