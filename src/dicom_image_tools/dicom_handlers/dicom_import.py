@@ -4,6 +4,7 @@ from pydicom.errors import InvalidDicomError
 from typing import Dict, Optional
 
 from .dicom_study import DicomStudy
+from .ct import CtSeries
 
 
 def import_dicom_from_folder(folder: Path, recursively: bool = True) -> Dict[str, DicomStudy]:
@@ -80,5 +81,10 @@ def import_dicom_file(file: Path) -> DicomStudy:
 
     output = DicomStudy(study_instance_uid=dcm.StudyInstanceUID)
     output.add_file(file=file, dcm=dcm)
+
+    if isinstance(output.Series[0], CtSeries):
+        output.Series[0].import_image_volume()
+    else:
+        output.Series[0].import_image()
 
     return output

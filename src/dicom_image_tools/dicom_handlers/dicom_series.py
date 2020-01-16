@@ -49,7 +49,7 @@ class DicomSeries:
 
         """
         if any([True if obj == file else False for obj in self.FilePaths]):
-            # Return None since the file is alread in hte volume
+            # Return None since the file is already in hte volume
             return
 
         if dcm is None:

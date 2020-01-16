@@ -72,6 +72,10 @@ class ProjectionSeries(DicomSeries):
 
         super().add_file(file=file, dcm=dcm)
 
+        if len(self.CompleteMetadata) == len(self.FilePaths):
+            # Skip out because the file has already been added
+            return
+
         if dcm is None:
             dcm = pydicom.dcmread(fp=str(file.absolute()), stop_before_pixels=True)
 
