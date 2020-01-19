@@ -3,8 +3,10 @@ import pydicom
 from pydicom import FileDataset
 from typing import List, Optional, Union
 
-from .dicom_series import DicomSeries
+from ..constants.SopClassUids import RADIATION_DOSE_STRUCTURED_REPORT_SOP_CLASS_UIDS, SECONDARY_CAPTURE_SOP_CLASS_UIDS
 from .ct import CtSeries
+from .dicom_series import DicomSeries
+from .dose_report_class import DoseReport
 from .projection import ProjectionSeries
 
 
@@ -32,6 +34,7 @@ class DicomStudy:
         self.Series: List[Union[DicomSeries, CtSeries, ProjectionSeries]] = []
         self.Manufacturer: Optional[str] = None
         self.ManufacturerModelName: Optional[str] = None
+        self.DoseReports: Optional[DoseReport] = DoseReport()
 
     def add_file(self, file: Path, dcm: Optional[FileDataset] = None) -> None:
         """ Add the DICOM file to the DicomStudy object after validating the study instance UID
@@ -53,6 +56,10 @@ class DicomStudy:
 
         self.Manufacturer = dcm.Manufacturer
         self.ManufacturerModelName = dcm.ManufacturerModelName
+
+        if dcm.SOPClassUID in RADIATION_DOSE_STRUCTURED_REPORT_SOP_CLASS_UIDS + SECONDARY_CAPTURE_SOP_CLASS_UIDS:
+            self.DoseReports.add_file(dataset=dcm)
+            return
 
         try:
             index = [obj.SeriesInstanceUid for obj in self.Series].index(dcm.SeriesInstanceUID)

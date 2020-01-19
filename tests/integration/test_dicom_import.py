@@ -10,7 +10,19 @@ def test_import_dicom_from_folder():
     folder = Path(__file__).parent.parent / 'test_data'
 
     imported_dicom = import_dicom_from_folder(folder=folder, recursively=True)
-    assert len(imported_dicom) == 5
+    assert len(imported_dicom) == 6
+
+
+def test_import_dicom_from_folder_imports_dose_reports_and_series():
+    folder = Path(__file__).parent.parent / 'test_data' / 'ct_study' / 'SeriesWithDoseReport'
+
+    imported_dicom = import_dicom_from_folder(folder=folder, recursively=True)
+    dcm_study = imported_dicom[list(imported_dicom.keys())[0]]
+
+    assert len(dcm_study.DoseReports.Rdsr) == 1
+    assert len(dcm_study.DoseReports.SecondaryCapture) == 3
+    assert len(dcm_study.Series) == 1
+    assert len(dcm_study.Series[0].FilePaths) == 60
 
 
 def test_import_dicom_from_folder_raises_type_error():
