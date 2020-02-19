@@ -5,6 +5,7 @@ from typing import List
 import numpy as np
 from scipy.signal import savgol_filter
 from scipy.stats import norm
+from skimage.exposure import rescale_intensity
 from skimage.feature import canny
 from skimage.transform import probabilistic_hough_line
 from skimage.filters import gaussian
@@ -59,22 +60,29 @@ def mtf_bar_pattern(max_hu: float, bg: float, sd: List[float], sd_bg: float) -> 
     return mtf
 
 
-def mtf_edge_phantom(image: np.ndarray, roi: SquareRoi) -> MtfCurve:
+def mtf_edge_phantom(image: np.ndarray, roi: SquareRoi, acceptable_line_gap: int = 20) -> MtfCurve:
     """ Calculate the MTF from an image of an edge phantom. Find the edge using a canny filter in combination with the
     Hough transform. The raw ESF is smoothed using a Savitzky-Golay filter with a 4th order polynomial.
 
     Args:
         image: A numpy ndarray of the image containing the edge phantom
         roi: A square ROI object specifying the region in which the edge phantom is contained
+        acceptable_line_gap: The maximum acceptable number of pixels that form a gap in the line that the probabilitic Hough function is trying to find
 
     Returns:
         An :obj:`MtfCurve <dicom_image_tools.image_quality_mtf.MtfCurve>` object instance with the frequency in
         cycles/pixel
 
     """
+    if not isinstance(acceptable_line_gap, int):
+        raise TypeError("The acceptable line gap must be given as an integer")
+
     # Find edge
     edge_image = roi.get_roi_part_of_image(image=image)
     blurred_edge_image = gaussian(edge_image, sigma=5)
+    # Add a rescale intensity to increase the probability that the canny filter finds the edge
+    blurred_edge_image = rescale_intensity(blurred_edge_image,
+                                           in_range=(blurred_edge_image.min(), blurred_edge_image.max()))
     edges = canny(
         image=blurred_edge_image,
         sigma=1,
@@ -82,7 +90,8 @@ def mtf_edge_phantom(image: np.ndarray, roi: SquareRoi) -> MtfCurve:
         high_threshold=blurred_edge_image.min() + (blurred_edge_image.max() - blurred_edge_image.min()) / 2
     )
 
-    lines = probabilistic_hough_line(image=edges, line_gap=10, line_length=round(min(edge_image.shape[:2]) * 0.95))
+    lines = probabilistic_hough_line(image=edges, line_gap=acceptable_line_gap,
+                                     line_length=round(min(edge_image.shape[:2]) * 0.95))
     line = Line(x0=lines[0][0][0], y0=lines[0][0][1], x1=lines[0][1][0], y1=lines[0][1][1])
 
     xx, yy = np.meshgrid(np.arange(edge_image.shape[1]), np.arange(edge_image.shape[0]))
