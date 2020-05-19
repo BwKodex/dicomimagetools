@@ -41,10 +41,23 @@ steps:
   displayName: 'Install dependencies'
 
 - script: |
-    pip install pytest pytest-azurepipelines
-    pytest
+    pip install pytest pytest-azurepipelines pytest-cov
+    pytest --cov=$(srcDirectory) --junitxml=junit/test-results.xml --cov-report=xml --cov-report=html
   workingDirectory: $(testsDirectory)
   displayName: 'Run tests with pytest'
+
+- task: PublishTestResults@2
+  condition: succeededOrFailed()
+  inputs:
+    testRunTitle: 'Publish test result for Python $(python.version)'
+    testResultsFormat: 'JUnit'
+    testResultsFiles: '**/test-*.xml'
+
+- task: PublishCodeCoverageResults@1
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+    reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
 - script: |
     pip install wheel
