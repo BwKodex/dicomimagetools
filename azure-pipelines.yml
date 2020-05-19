@@ -6,7 +6,7 @@
 variables:
   package: dicom_image_tools
   srcDirectory: src/$(package)
-  testsDirectory: tests/$(package)
+  testsDirectory: tests
   artifactFeed: artifacts
   publishedVersion: 3.8
 
