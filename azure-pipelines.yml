@@ -5,8 +5,8 @@
 
 variables:
   package: dicom_image_tools
-  srcDirectory: src/$(package)
-  testsDirectory: tests
+  srcDirectory: $(System.DefaultWorkingDirectory)/src/$(package)
+  testsDirectory: $(System.DefaultWorkingDirectory)/tests
   artifactFeed: artifacts
   publishedVersion: 3.8
 
@@ -56,8 +56,8 @@ steps:
 - task: PublishCodeCoverageResults@1
   inputs:
     codeCoverageTool: Cobertura
-    summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-    reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+    summaryFileLocation: '**/coverage.xml'
+    reportDirectory: '**/htmlcov'
 
 - script: |
     pip install wheel
