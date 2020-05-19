@@ -49,7 +49,6 @@ steps:
 - script: |
     pip install wheel
     python setup.py sdist bdist_wheel
-    ls
   displayName: 'Build package'
 
 - task: PublishPipelineArtifact@1
