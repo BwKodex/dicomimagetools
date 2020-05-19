@@ -49,10 +49,11 @@ steps:
 - script: |
     pip install wheel
     python setup.py sdist bdist_wheel
+    ls
   displayName: 'Build package'
 
 - task: PublishPipelineArtifact@1
   displayName: Publish artifacts
   inputs: 
-    targetPath: '$(Pipeline.Workspace)/dist'
+    targetPath: 'dist'
     artifactName: 'dist$(python.version)'
