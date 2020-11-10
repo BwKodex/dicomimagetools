@@ -1,10 +1,13 @@
+import logging
 from pathlib import Path
 import pydicom
 from pydicom.errors import InvalidDicomError
-from typing import Dict, Optional
+from typing import Dict
 
 from .dicom_study import DicomStudy
 from .ct import CtSeries
+
+logger = logging.getLogger(__name__)
 
 
 def import_dicom_from_folder(folder: Path, recursively: bool = True) -> Dict[str, DicomStudy]:
@@ -36,6 +39,10 @@ def import_dicom_from_folder(folder: Path, recursively: bool = True) -> Dict[str
 
     for fp in files:
         if not fp.is_file():
+            continue
+
+        if fp.name.casefold() == ".DS_Store".casefold():
+            logger.debug("Skipping .DS_Store file")
             continue
 
         try:
