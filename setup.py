@@ -21,10 +21,10 @@ setup(
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
     install_requires=[
-        'pydicom>=1.3.0',
-        'numpy>=1.18.1',
-        'scikit-image>=0.16.0',
-        'scipy>=1.4.1'
+        'pydicom>=2.1.1',
+        'numpy>=1.19.0, <=1.19.2',
+        'scikit-image>=0.17.2',
+        'scipy>=1.5.4'
     ],
     zip_safe=False
 )
