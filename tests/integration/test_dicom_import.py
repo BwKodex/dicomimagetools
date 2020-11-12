@@ -25,10 +25,11 @@ def test_import_dicom_from_folder_should_ignore_DS_Store_files(caplog):
         if not ds_store_file.exists():
             with ds_store_file.open("w") as fp:
                 fp.write("irrelevant string")
-            test_created_ds_store = True
 
-            with caplog.at_level(logging.DEBUG):
-                _ = import_dicom_from_folder(folder=folder, recursively=True)
+        test_created_ds_store = True
+
+        with caplog.at_level(logging.DEBUG):
+            _ = import_dicom_from_folder(folder=folder, recursively=True)
     finally:
         if test_created_ds_store:
             ds_store_file.unlink(missing_ok=True)
