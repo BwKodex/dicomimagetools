@@ -6,9 +6,25 @@ import pytest
 from dicom_image_tools.dicom_handlers.dicom_import import import_dicom_from_folder, import_dicom_file
 from dicom_image_tools.dicom_handlers.dicom_study import DicomStudy
 
+def test_import_dicom_from_file_should_parse_kv_ma_ms_tags():
+
+    file = Path(__file__).parent.parent / 'test_data' / 'io' / 'iotest_60kv_7ma_20ms.dcm'
+    
+    expected_output = dict(kV=60.0, mA=7.0, ms=20.0)
+    output = []
+    expected = [True, True, True]
+
+    dicom_study = import_dicom_file(file=file)
+    dicom_study.Series[0].import_image()
+
+    output.append(dicom_study.Series[0].kV[0] == expected_output['kV'])
+    output.append(dicom_study.Series[0].mA[0] == expected_output['mA'])
+    output.append(dicom_study.Series[0].ms[0] == expected_output['ms'])
+
+    assert output == expected
 
 def test_import_dicom_from_folder_should_find_all_files_in_given_folder():
-    expected = 6
+    expected = 7
 
     folder = Path(__file__).parent.parent / 'test_data'
 
