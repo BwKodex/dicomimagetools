@@ -96,8 +96,8 @@ def lcd_statistical_random(analysis_matrix: np.ndarray, pixel_size: VoxelData, o
     random_rois = int(np.floor(rois - structured_rois[0] * structured_rois[1]))
 
     # Determine the mean values and standard deviation for a structured ROI set
-    for row in range(np.int(structured_rois[0])):
-        for col in range(np.int(structured_rois[1])):
+    for col in range(np.int(structured_rois[0])):
+        for row in range(np.int(structured_rois[1])):
             roi = SquareRoi(
                 center=Point(x=int(col * roi_size[0] + np.ceil(roi_size[0] / 2)),
                              y=int(row * roi_size[1] + np.ceil(roi_size[1] / 2))),

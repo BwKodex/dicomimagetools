@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from pydicom.errors import InvalidDicomError
 import pytest
@@ -6,11 +7,34 @@ from dicom_image_tools.dicom_handlers.dicom_import import import_dicom_from_fold
 from dicom_image_tools.dicom_handlers.dicom_study import DicomStudy
 
 
-def test_import_dicom_from_folder():
+def test_import_dicom_from_folder_should_find_all_files_in_given_folder():
+    expected = 6
+
     folder = Path(__file__).parent.parent / 'test_data'
 
     imported_dicom = import_dicom_from_folder(folder=folder, recursively=True)
-    assert len(imported_dicom) == 6
+    assert len(imported_dicom) == expected
+
+
+def test_import_dicom_from_folder_should_ignore_DS_Store_files(caplog):
+    folder = Path(__file__).parent.parent / 'test_data' / 'px'
+    ds_store_file = folder / '.DS_Store'
+
+    test_created_ds_store: bool = False
+    try:
+        if not ds_store_file.exists():
+            with ds_store_file.open("w") as fp:
+                fp.write("irrelevant string")
+
+            test_created_ds_store = True
+
+        with caplog.at_level(logging.DEBUG):
+            _ = import_dicom_from_folder(folder=folder, recursively=True)
+    finally:
+        if test_created_ds_store:
+            ds_store_file.unlink(missing_ok=True)
+
+    assert "Skipping .DS_Store file" in caplog.text
 
 
 def test_import_dicom_from_folder_imports_dose_reports_and_series():
