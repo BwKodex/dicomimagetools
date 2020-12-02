@@ -53,6 +53,7 @@ class ProjectionSeries(DicomSeries):
 
         self.kV: Optional[List[float]] = []
         self.mA: Optional[List[float]] = []
+        self.ms: Optional[List[float]] = []
         self.ImageVolume: Optional[List[np.ndarray]] = []
 
         self.add_file(file=file, dcm=dcm)
@@ -102,6 +103,9 @@ class ProjectionSeries(DicomSeries):
             self.mA.append(float(dcm.XRayTubeCurrentInmA))
         elif 'XRayTubeCurrentInuA' in dcm:
             self.mA.append(float(dcm.XRayTubeCurrentInuA) / 1000)
+
+        if 'ExposureTime' in dcm:
+            self.ms.append(float(dcm.ExposureTime))
 
         # Remove pixel data part of dcm to decrease memory used for the object
         if 'PixelData' in dcm:
