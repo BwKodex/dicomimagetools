@@ -107,7 +107,7 @@ class ProjectionSeries(DicomSeries):
         if 'PixelData' in dcm:
             try:
                 del dcm[0x7FE00010]
-            except Exception as e:
+            except Exception:
                 logger.warning("Failed to remove pixel data from file before appending to CompleteMetadata",
                                exc_info=True)
                 pass
@@ -156,4 +156,3 @@ class ProjectionSeries(DicomSeries):
             datetime_format += ".%f"
 
         return datetime.strptime(acquisition_datetime, datetime_format)
-
