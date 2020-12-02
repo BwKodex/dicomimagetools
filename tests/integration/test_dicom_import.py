@@ -32,7 +32,7 @@ def test_import_dicom_from_folder_should_ignore_DS_Store_files(caplog):
             _ = import_dicom_from_folder(folder=folder, recursively=True)
     finally:
         if test_created_ds_store:
-            ds_store_file.unlink(missing_ok=True)
+            ds_store_file.unlink()
 
     assert "Skipping .DS_Store file" in caplog.text
 
