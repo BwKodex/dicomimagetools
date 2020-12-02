@@ -1,3 +1,6 @@
+from datetime import datetime
+import logging
+
 import numpy as np
 from pathlib import Path
 import pydicom
@@ -7,6 +10,8 @@ from typing import List, Optional
 from .dicom_series import DicomSeries
 from ..helpers.pixel_data import get_pixel_array
 from ..helpers.voxel_data import VoxelData
+
+logger = logging.getLogger(__name__)
 
 
 class ProjectionSeries(DicomSeries):
@@ -103,6 +108,8 @@ class ProjectionSeries(DicomSeries):
             try:
                 del dcm[0x7FE00010]
             except Exception as e:
+                logger.warning("Failed to remove pixel data from file before appending to CompleteMetadata",
+                               exc_info=True)
                 pass
 
         self.CompleteMetadata.append(dcm)
@@ -117,3 +124,36 @@ class ProjectionSeries(DicomSeries):
         for fp in self.FilePaths:
             dcm = pydicom.dcmread(str(fp.absolute()))
             self.ImageVolume.append(get_pixel_array(dcm=dcm))
+
+    def sort_images_on_acquisition_time(self) -> None:
+        """Reorder the images in the series based on the acquisition time
+
+        Returns:
+
+        """
+        file_order = [ind for ind in list(
+            np.argsort(
+                np.array(
+                    [self._get_acquisition_time(ds) for ds in self.CompleteMetadata]
+                )
+            )
+        )]
+
+        self.CompleteMetadata = [self.CompleteMetadata[ind] for ind in file_order]
+        self.FilePaths = [self.FilePaths[ind] for ind in file_order]
+        if len(self.ImageVolume):
+            self.ImageVolume = [self.ImageVolume[ind, :, :] for ind in file_order]
+
+    @staticmethod
+    def _get_acquisition_time(dataset: FileDataset) -> Optional[datetime]:
+        acquisition_date = dataset.AcquisitionDate
+        acquisition_time = dataset.AcquisitionTime
+
+        acquisition_datetime = f"{acquisition_date} {acquisition_time}"
+        datetime_format = "%Y%m%d %H%M%S"
+
+        if "." in acquisition_time:
+            datetime_format += ".%f"
+
+        return datetime.strptime(acquisition_datetime, datetime_format)
+
