@@ -1,12 +1,17 @@
+from datetime import datetime
+import logging
+
 import numpy as np
 from pathlib import Path
 import pydicom
 from pydicom import FileDataset
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from .dicom_series import DicomSeries
 from ..helpers.pixel_data import get_pixel_array
 from ..helpers.voxel_data import VoxelData
+
+logger = logging.getLogger(__name__)
 
 
 class ProjectionSeries(DicomSeries):
@@ -46,9 +51,9 @@ class ProjectionSeries(DicomSeries):
         if self.Modality == 'IO' and 'DetectorManufacturerModelName' in dcm:
             self.ManufacturersModelName = dcm.DetectorManufacturerModelName
 
-        self.kV: Optional[List[float]] = []
-        self.mA: Optional[List[float]] = []
-        self.ms: Optional[List[float]] = []
+        self.kV: Optional[List[Optional[float]]] = []
+        self.mA: Optional[List[Optional[float]]] = []
+        self.ms: Optional[List[Optional[float]]] = []
         self.ImageVolume: Optional[List[np.ndarray]] = []
 
         self.add_file(file=file, dcm=dcm)
@@ -89,8 +94,8 @@ class ProjectionSeries(DicomSeries):
             self.VoxelData.append(VoxelData(x=float(dcm.DetectorElementSpacing[1]),
                                             y=float(dcm.DetectorElementSpacing[0]),
                                             z=None))
-        if 'KVP' in dcm:
-            self.kV.append(float(dcm.KVP))
+
+        self.kV.append(self._get_tag_value_as_float_or_none("KVP", ds=dcm))
 
         if 'XRayTubeCurrent' in dcm:
             self.mA.append(float(dcm.XRayTubeCurrent))
@@ -98,18 +103,30 @@ class ProjectionSeries(DicomSeries):
             self.mA.append(float(dcm.XRayTubeCurrentInmA))
         elif 'XRayTubeCurrentInuA' in dcm:
             self.mA.append(float(dcm.XRayTubeCurrentInuA) / 1000)
+        else:
+            self.mA.append(None)
 
-        if 'ExposureTime' in dcm:
-            self.ms.append(float(dcm.ExposureTime))
+        self.ms.append(self._get_tag_value_as_float_or_none('ExposureTime', ds=dcm))
 
         # Remove pixel data part of dcm to decrease memory used for the object
         if 'PixelData' in dcm:
             try:
                 del dcm[0x7FE00010]
-            except Exception as e:
+            except Exception:
+                logger.warning("Failed to remove pixel data from file before appending to CompleteMetadata",
+                               exc_info=True)
                 pass
 
         self.CompleteMetadata.append(dcm)
+
+    @staticmethod
+    def _get_tag_value_as_float_or_none(tag_name: str, ds: FileDataset) -> Optional[float]:
+        tag_value = ds.get(tag_name)
+
+        if tag_value is None:
+            return None
+
+        return float(tag_value)
 
     def import_image(self) -> None:
         """ Import the pixel data into the ImageVolume property
@@ -121,3 +138,44 @@ class ProjectionSeries(DicomSeries):
         for fp in self.FilePaths:
             dcm = pydicom.dcmread(str(fp.absolute()))
             self.ImageVolume.append(get_pixel_array(dcm=dcm))
+
+    def sort_images_on_acquisition_time(self) -> None:
+        """Reorder the images in the series based on the acquisition time
+
+        Returns:
+
+        """
+        file_order = [ind for ind in list(
+            np.argsort(
+                np.array(
+                    [self._get_acquisition_time(ds) for ds in self.CompleteMetadata]
+                )
+            )
+        )]
+
+        self.kV = self._reorder_list_by_index_order_list(order_list=file_order, list_to_order=self.kV)
+        self.mA = self._reorder_list_by_index_order_list(order_list=file_order, list_to_order=self.mA)
+        self.ms = self._reorder_list_by_index_order_list(order_list=file_order, list_to_order=self.ms)
+        self.CompleteMetadata = self._reorder_list_by_index_order_list(order_list=file_order,
+                                                                       list_to_order=self.CompleteMetadata)
+        self.FilePaths = self._reorder_list_by_index_order_list(order_list=file_order, list_to_order=self.FilePaths)
+        self.ImageVolume = self._reorder_list_by_index_order_list(order_list=file_order, list_to_order=self.ImageVolume)
+
+    @staticmethod
+    def _get_acquisition_time(dataset: FileDataset) -> Optional[datetime]:
+        acquisition_date = dataset.AcquisitionDate
+        acquisition_time = dataset.AcquisitionTime
+
+        acquisition_datetime = f"{acquisition_date} {acquisition_time}"
+        datetime_format = "%Y%m%d %H%M%S"
+
+        if "." in acquisition_time:
+            datetime_format += ".%f"
+
+        return datetime.strptime(acquisition_datetime, datetime_format)
+
+    @staticmethod
+    def _reorder_list_by_index_order_list(order_list: List[int], list_to_order: List[Any]):
+        if len(list_to_order) == 0:
+            return list_to_order
+        return [list_to_order[ind] for ind in order_list]
