@@ -31,6 +31,7 @@ class DicomSeries:
         self.SeriesDescription: Optional[str] = None
         self.CompleteMetadata: List[Optional[FileDataset]] = []
         self.VoxelData: List[VoxelData] = []
+        self.PixelIntensityNormalized: bool = False
 
         self.ImageVolume: Optional[np.ndarray] = None
         self.Mask: Optional[np.ndarray] = None
@@ -64,3 +65,30 @@ class DicomSeries:
 
         self.FilePaths.append(file)
 
+    def normalize_pixel_intensity_relationship(self):
+        """ Reverse the pixel intensity for images with negative pixel intensity relationship to make the lower pixel
+        value correspond to less X-Ray beam intensity
+
+        Raises:
+            ValueError: if there are no images in the ImageVolume
+
+        """
+        if self.PixelIntensityNormalized:
+            return
+
+        if self.ImageVolume is None or not len(self.ImageVolume):
+            raise ValueError("No imported image volume to normalize")
+
+        self.ImageVolume = [self._normalize_image_pixel_intensity_relationship(image, self.CompleteMetadata[ind])
+                            for ind, image in enumerate(self.ImageVolume)]
+
+        self.PixelIntensityNormalized = True
+
+    @staticmethod
+    def _normalize_image_pixel_intensity_relationship(image: np.ndarray, metadata: FileDataset) -> np.ndarray:
+        if metadata.PixelIntensityRelationshipSign == 1:
+            return image
+
+        image = np.multiply(image - np.power(2, metadata.BitsStored), -1)
+
+        return image
