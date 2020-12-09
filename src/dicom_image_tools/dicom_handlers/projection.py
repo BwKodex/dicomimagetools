@@ -139,6 +139,9 @@ class ProjectionSeries(DicomSeries):
             dcm = pydicom.dcmread(str(fp.absolute()))
             self.ImageVolume.append(get_pixel_array(dcm=dcm))
 
+        if self.PixelIntensityNormalized:
+            self.normalize_pixel_intensity_relationship()
+
     def sort_images_on_acquisition_time(self) -> None:
         """Reorder the images in the series based on the acquisition time
 
