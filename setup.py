@@ -5,7 +5,7 @@ README = (Path(__file__).parent / 'README.md').read_text()
 
 setup(
     name='dicom_image_tools',
-    version='20.1.1',
+    version='21.8.1',
     description='Python package for managing DICOM images from different modalities',
     long_description=README,
     long_description_content_type='text/markdown',
