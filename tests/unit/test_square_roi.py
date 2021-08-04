@@ -32,6 +32,29 @@ def test_square_roi_creation():
     assert square_roi.Center.x == 6
     assert square_roi.Center.y == 6
     assert square_roi.Center.z is None
+    assert square_roi.HeightInPixels == 6
+    assert square_roi.WidthInPixels == 6
+    assert square_roi.Height == 3
+    assert square_roi.Width == 3
+    assert square_roi.UpperLeft.x == 4
+    assert square_roi.UpperLeft.y == 4
+    assert square_roi.LowerLeft.x == 4
+    assert square_roi.LowerLeft.y == 9
+    assert square_roi.UpperRight.x == 9
+    assert square_roi.UpperRight.y == 4
+    assert square_roi.LowerRight.x == 9
+    assert square_roi.LowerRight.y == 9
+
+
+def test_square_roi_creation_widht_pixel_size():
+    center = dict(x=6, y=6, z=None)
+    voxel_data = VoxelData(x=0.5, y=0.5, z=None)
+    square_roi = SquareRoi(center=center, height=6, width=6, pixel_size=voxel_data,roi_size_in_pixels=True)
+    assert square_roi.Center.x == 6
+    assert square_roi.Center.y == 6
+    assert square_roi.Center.z is None
+    assert square_roi.HeightInPixels == 6
+    assert square_roi.WidthInPixels == 6
     assert square_roi.Height == 3
     assert square_roi.Width == 3
     assert square_roi.UpperLeft.x == 4
