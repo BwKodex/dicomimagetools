@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 from scipy.stats import sem
 from skimage import color
@@ -47,29 +49,31 @@ class SquareRoi(Roi):
     """
 
     def __init__(self, center: CenterPosition, height: float, width: float, pixel_size: VoxelData,
-                 resize_too_big_roi: bool = False):
+                 resize_too_big_roi: bool = False, roi_size_in_pixels: Optional[bool] = False):
         super().__init__(center=center)
-        self.Height: float = height
-        self.Width: float = width
+        self.HeightInPixels: float = height if roi_size_in_pixels else int(round(height / pixel_size.y))
+        self.WidthInPixels: float = width if roi_size_in_pixels else int(round(width / pixel_size.x))
+        self.Height: float = int(round(height * pixel_size.y)) if roi_size_in_pixels else height
+        self.Width: float = int(round(width * pixel_size.x)) if roi_size_in_pixels else width
         self.ResizeTooBigRoi: bool = resize_too_big_roi
 
-        height_pixels = int(round(self.Height / pixel_size.y))
-        width_pixels = int(round(self.Width / pixel_size.x))
+        self.HeightInPixels = height if roi_size_in_pixels else int(round(self.Height / pixel_size.y))
+        self.WidthInPixels = width if roi_size_in_pixels else int(round(self.Width / pixel_size.x))
 
-        if height_pixels < 1 or width_pixels < 1:
-            raise ValueError((f'Too small ROI size specified. Both width ({width_pixels}) and height ({height_pixels}) '
-                              f'must be at least 1 pixel'))
+        if self.HeightInPixels < 1 or self.WidthInPixels < 1:
+            raise ValueError((f'Too small ROI size specified. Both width ({self.WidthInPixels}) and height '
+                              f'({self.HeightInPixels}) must be at least 1 pixel'))
 
-        height_pixels = int(round((self.Height - pixel_size.y) / pixel_size.y))
-        if height_pixels < 0:
-            height_pixels = 0
-        width_pixels = int(round((self.Width - pixel_size.x) / pixel_size.x))
-        if width_pixels < 0:
-            width_pixels = 0
+        self.HeightInPixels = int(round((self.Height - pixel_size.y) / pixel_size.y))
+        if self.HeightInPixels < 0:
+            self.HeightInPixels = 0
+        self.WidthInPixels = int(round((self.Width - pixel_size.x) / pixel_size.x))
+        if self.WidthInPixels < 0:
+            self.WidthInPixels = 0
 
         self.UpperLeft: IntPoint = IntPoint(
-            x=int(np.floor(self.Center.x - (width_pixels / 2) + 0.5)),
-            y=int(np.floor(self.Center.y - (height_pixels / 2) + 0.5))
+            x=int(np.floor(self.Center.x - (self.WidthInPixels / 2) + 0.5)),
+            y=int(np.floor(self.Center.y - (self.HeightInPixels / 2) + 0.5))
         )
         # Validate corner does not have negative index
         if self.UpperLeft.x < 0 or self.UpperLeft.y < 0:
@@ -82,17 +86,17 @@ class SquareRoi(Roi):
                 self.UpperLeft.y = 0
 
         self.LowerLeft: IntPoint = IntPoint(
-            x=int(np.floor(self.Center.x - (width_pixels / 2) + 0.5)),
-            y=int(np.floor(self.Center.y + (height_pixels / 2) + 0.5))
+            x=int(np.floor(self.Center.x - (self.WidthInPixels / 2) + 0.5)),
+            y=int(np.floor(self.Center.y + (self.HeightInPixels / 2) + 0.5))
         )
 
         self.UpperRight: IntPoint = IntPoint(
-            x=int(np.floor(self.Center.x + (width_pixels / 2) + 0.5)),
-            y=int(np.floor(self.Center.y - (height_pixels / 2) + 0.5)))
+            x=int(np.floor(self.Center.x + (self.WidthInPixels / 2) + 0.5)),
+            y=int(np.floor(self.Center.y - (self.HeightInPixels / 2) + 0.5)))
 
         self.LowerRight: IntPoint = IntPoint(
-            x=int(np.floor(self.Center.x + (width_pixels / 2) + 0.5)),
-            y=int(np.floor(self.Center.y + (height_pixels / 2) + 0.5)))
+            x=int(np.floor(self.Center.x + (self.WidthInPixels / 2) + 0.5)),
+            y=int(np.floor(self.Center.y + (self.HeightInPixels / 2) + 0.5)))
 
     def _check_roi_placement(self, image: np.ndarray) -> (int, int):
         """ Checks that the ROI is inside the given image. If not raise Value error or if ResizeTooBigRoi == True,
