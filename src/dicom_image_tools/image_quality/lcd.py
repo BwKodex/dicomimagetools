@@ -38,14 +38,14 @@ def lcd_statistical(stderr: FloatListType) -> FloatListType:
 
 
 def lcd_statistical_random(analysis_matrix: np.ndarray, pixel_size: VoxelData, object_size: float,
-                           rois: Optional[int] = 1000) -> Dict[str, Union[str, float, List[float]]]:
+                           rois: Optional[int] = 1000, return_rois: Optional[bool] = False) -> Dict[str, Union[str, float, List[float]]]:
     """ Implements a statistical method for determining the low contrast detectability (LCD) or low contrast limit (LCL)
 
     Args:
         analysis_matrix: Matrix of the homogeneous image area that is to be analysed
         pixel_size: The voxel data for the analysis_matrix
         object_size: The side of the object to analyse for in mm
-        rois: The number of rois to include in the analysis
+        rois: The number of ROIs to include in the analysis
 
     Returns:
         Dictionary containing the mean, standard deviation, standard error and LCD on the form
@@ -57,6 +57,7 @@ def lcd_statistical_random(analysis_matrix: np.ndarray, pixel_size: VoxelData, o
           'SD': float,                           # Standard deviation
           'Error SD': float,                     # Standard error of the standard deviation
           'Perc contrast At 95 Perc CL': float,  # Percent contrast at 95% contrast level
+          'ROIs': Optional[List[SquareRoi]],     # A list of all ROIs used or None
         }
 
     """
@@ -79,7 +80,8 @@ def lcd_statistical_random(analysis_matrix: np.ndarray, pixel_size: VoxelData, o
         'Std Error Mean': float(),
         'SD': float(),
         'Error SD': float(),
-        'Perc Contrast At 95 Perc CL': float()
+        'Perc Contrast At 95 Perc CL': float(),
+        'ROIs': [] if return_rois else None,
     }
 
     result = {
@@ -131,6 +133,9 @@ def lcd_statistical_random(analysis_matrix: np.ndarray, pixel_size: VoxelData, o
                 result['Mean'].append(tmp_mean)
                 result['SD'].append(tmp_sd)
                 result['Std Error Mean'].append(tmp_sem)
+
+                if return_rois:
+                    result["ROIs"].append(roi)
 
     # Calculate the mean value and related values from the ROIs
     output['Mean'] = np.mean(result['Mean'])
