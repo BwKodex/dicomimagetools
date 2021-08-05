@@ -1,3 +1,4 @@
+from dicom_image_tools import SquareRoi
 from dicom_image_tools.image_quality.lcd import lcd_statistical, lcd_statistical_random
 from dicom_image_tools.helpers.voxel_data import VoxelData
 import numpy as np
@@ -74,3 +75,14 @@ def test_lcd_statistical_random():
     assert not np.isnan(res.get('SD'))
     assert not np.isnan(res.get('Error SD'))
     assert not np.isnan(res.get('Perc Contrast At 95 Perc CL'))
+    assert res.get("ROIs") is None
+
+
+def test_lcd_statistical_random_returns_rois():
+    res = lcd_statistical_random(analysis_matrix=TEST_MATRIX, pixel_size=VoxelData(x=1.0, y=1.0),
+                                 object_size=3.0, return_rois=True)
+
+    rois = res.get("ROIs")
+
+    assert rois is not None
+    assert all([isinstance(roi, SquareRoi) for roi in rois])

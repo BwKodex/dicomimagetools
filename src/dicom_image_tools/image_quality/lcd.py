@@ -81,13 +81,13 @@ def lcd_statistical_random(analysis_matrix: np.ndarray, pixel_size: VoxelData, o
         'SD': float(),
         'Error SD': float(),
         'Perc Contrast At 95 Perc CL': float(),
-        'ROIs': [] if return_rois else None,
     }
 
     result = {
         'Mean': [],
         'SD': [],
-        'Std Error Mean': []
+        'Std Error Mean': [],
+        'ROIs': [],
     }
 
     log.info(f'Calculating LCD from a set of {rois} ROIs of size {object_size:.3f} mm')
@@ -133,9 +133,7 @@ def lcd_statistical_random(analysis_matrix: np.ndarray, pixel_size: VoxelData, o
                 result['Mean'].append(tmp_mean)
                 result['SD'].append(tmp_sd)
                 result['Std Error Mean'].append(tmp_sem)
-
-                if return_rois:
-                    result["ROIs"].append(roi)
+                result["ROIs"].append(roi)
 
     # Calculate the mean value and related values from the ROIs
     output['Mean'] = np.mean(result['Mean'])
@@ -143,5 +141,8 @@ def lcd_statistical_random(analysis_matrix: np.ndarray, pixel_size: VoxelData, o
     output['SD'] = np.mean(result['SD'])
     output['Error SD'] = sem(result['SD'])
     output['Perc Contrast At 95 Perc CL'] = lcd_statistical(stderr=output['Std Error Mean'])
+
+    if return_rois:
+        output["ROIs"] = result["ROIs"]
 
     return output
