@@ -232,7 +232,7 @@ def calculate_max_min_lat_ap_radon(mask: np.ndarray, voxel_data: VoxelData) -> S
     if not isinstance(voxel_data, VoxelData):
         raise TypeError("voxel_data must be a VoxelData object instance")
 
-    radon_mask = radon(mask, theta=np.arange(180), circle=True)
+    radon_mask = radon(mask, theta=np.arange(180), circle=True, preserve_range=True)
 
     non_zero = [np.count_nonzero(radon_mask[:, ind]) for ind in range(180)]
 
