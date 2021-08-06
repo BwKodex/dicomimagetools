@@ -1,12 +1,13 @@
-from dicom_image_tools.dicom_handlers.dicom_import import import_dicom_from_folder
-from dicom_image_tools.dicom_handlers.ct import CtSeries
-from dicom_image_tools.dicom_handlers.dicom_study import DicomStudy
-import numpy as np
 from pathlib import Path
+
+import numpy as np
 import pytest
 
+from dicom_image_tools.dicom_handlers.ct import CtSeries
+from dicom_image_tools.dicom_handlers.dicom_import import import_dicom_from_folder
+from dicom_image_tools.dicom_handlers.dicom_study import DicomStudy
 
-CT_PATH1 = Path(__file__).parent.parent.parent / 'test_data' / 'ct_study' / 'GE' / 'serie1'
+CT_PATH1 = Path(__file__).parent.parent.parent / "test_data" / "ct_study" / "GE" / "serie1"
 
 
 def _get_ct_study() -> DicomStudy:

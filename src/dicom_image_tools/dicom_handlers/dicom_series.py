@@ -1,13 +1,15 @@
-import numpy as np
 from pathlib import Path
+from typing import List, Optional
+
+import numpy as np
 import pydicom
 from pydicom import FileDataset
-from typing import List, Optional
+
 from ..helpers.voxel_data import VoxelData
 
 
 class DicomSeries:
-    """ A class to manage DICOM files connected by a Series Instance UID
+    """A class to manage DICOM files connected by a Series Instance UID
 
     Args:
         series_instance_uid: Series instance UID of the object to be created
@@ -21,6 +23,7 @@ class DicomSeries:
         Mask: A mask of the same dimension as the image volume to apply to the image volume
 
     """
+
     def __init__(self, series_instance_uid: str):
         if not isinstance(series_instance_uid, str):
             raise TypeError("series_instance_uid must be a string")
@@ -37,7 +40,7 @@ class DicomSeries:
         self.Mask: Optional[np.ndarray] = None
 
     def add_file(self, file: Path, dcm: Optional[FileDataset] = None):
-        """ Add a file to the objects list of files
+        """Add a file to the objects list of files
 
         First performs a check that the file is a valid DICOM file and that it belongs to the object/series
 
@@ -60,13 +63,13 @@ class DicomSeries:
             msg = f"Wrong SeriesInstanceUID. Expected: {self.SeriesInstanceUid}; Input: {dcm.SeriesInstanceUID}"
             raise ValueError(msg)
 
-        if 'SeriesDescription' in dcm:
+        if "SeriesDescription" in dcm:
             self.SeriesDescription = dcm.SeriesDescription
 
         self.FilePaths.append(file)
 
     def normalize_pixel_intensity_relationship(self):
-        """ Reverse the pixel intensity for images with negative pixel intensity relationship to make the lower pixel
+        """Reverse the pixel intensity for images with negative pixel intensity relationship to make the lower pixel
         value correspond to less X-Ray beam intensity
 
         Raises:
@@ -79,8 +82,10 @@ class DicomSeries:
         if self.ImageVolume is None or not len(self.ImageVolume):
             raise ValueError("No imported image volume to normalize")
 
-        self.ImageVolume = [self._normalize_image_pixel_intensity_relationship(image, self.CompleteMetadata[ind])
-                            for ind, image in enumerate(self.ImageVolume)]
+        self.ImageVolume = [
+            self._normalize_image_pixel_intensity_relationship(image, self.CompleteMetadata[ind])
+            for ind, image in enumerate(self.ImageVolume)
+        ]
 
         self.PixelIntensityNormalized = True
 

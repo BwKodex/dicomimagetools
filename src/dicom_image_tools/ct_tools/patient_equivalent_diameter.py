@@ -1,9 +1,10 @@
-from dataclasses import dataclass
 import json
 import logging
+from dataclasses import dataclass
+from typing import List, Optional, Tuple
+
 import numpy as np
 from skimage.transform import hough_line, radon
-from typing import List, Optional, Tuple
 
 from ..dicom_handlers.ct import CtSeries
 from ..helpers.voxel_data import VoxelData
@@ -70,9 +71,10 @@ class SinogramData:
         return json.dumps(self.to_dict())
 
 
-def _calculate_slice_area_equivalent_diameter(image: np.ndarray, mask: np.ndarray,
-                                              voxel_data: VoxelData) -> EquivalentDiameterData:
-    """ Calculate the area equivalent diameter from a 2D image based on AAPM report 204 and 220. Return an
+def _calculate_slice_area_equivalent_diameter(
+    image: np.ndarray, mask: np.ndarray, voxel_data: VoxelData
+) -> EquivalentDiameterData:
+    """Calculate the area equivalent diameter from a 2D image based on AAPM report 204 and 220. Return an
     EquivalentDiameterData instance.
 
     Args:
@@ -127,15 +129,23 @@ def _calculate_slice_area_equivalent_diameter(image: np.ndarray, mask: np.ndarra
     eed_cm = np.sqrt(np.multiply(ap_cm, lat_cm))
 
     return EquivalentDiameterData(
-        Area_px=mask_area_pixels, EAD_px=mask_equivalent_diameter_pixels, EAD_cm=mask_equivalent_diameter_cm,
+        Area_px=mask_area_pixels,
+        EAD_px=mask_equivalent_diameter_pixels,
+        EAD_cm=mask_equivalent_diameter_cm,
         EquivalentAreaCircumference_cm=mask_equivalent_circumference_cm,
-        MeanHU=mean_hu, MedianHU=median_hu, LAT_cm=lat_cm, AP_cm=ap_cm,
-        WED_px=wed_pixels, WED_cm=wed_cm, EED_px=eed_pixels, EED_cm=eed_cm
+        MeanHU=mean_hu,
+        MedianHU=median_hu,
+        LAT_cm=lat_cm,
+        AP_cm=ap_cm,
+        WED_px=wed_pixels,
+        WED_cm=wed_cm,
+        EED_px=eed_pixels,
+        EED_cm=eed_cm,
     )
 
 
 def calculate_max_min_lat_ap_hough(mask: np.ndarray, voxel_data: VoxelData):
-    """ Calculate the maximum and minimum distance through the patient/mask, and the angles at which they occur, using
+    """Calculate the maximum and minimum distance through the patient/mask, and the angles at which they occur, using
     the Hough transform.
 
     Args:
@@ -166,18 +176,19 @@ def calculate_max_min_lat_ap_hough(mask: np.ndarray, voxel_data: VoxelData):
     min_diffs = [
         min(angle[max_indices]),
         min([np.absolute(ang - np.divide(np.pi, 2.0)) for ang in angle[max_indices]]),
-        min([np.absolute(ang - np.pi) for ang in angle[max_indices]])
+        min([np.absolute(ang - np.pi) for ang in angle[max_indices]]),
     ]
     tmp_min_ind = min_diffs.index(min(min_diffs))
     if tmp_min_ind == 0:
-        sinogram_max_degree = [ang for ang in angle[max_indices]
-                               if ang == min_diffs[tmp_min_ind]][0]
+        sinogram_max_degree = [ang for ang in angle[max_indices] if ang == min_diffs[tmp_min_ind]][0]
     elif tmp_min_ind == 1:
-        sinogram_max_degree = [ang for ang in angle[max_indices]
-                               if np.absolute(ang - np.divide(np.pi, 2.0)) == min_diffs[tmp_min_ind]][0]
+        sinogram_max_degree = [
+            ang for ang in angle[max_indices] if np.absolute(ang - np.divide(np.pi, 2.0)) == min_diffs[tmp_min_ind]
+        ][0]
     else:
-        sinogram_max_degree = [ang for ang in angle[max_indices]
-                               if np.absolute(ang - np.pi) == min_diffs[tmp_min_ind]][0]
+        sinogram_max_degree = [ang for ang in angle[max_indices] if np.absolute(ang - np.pi) == min_diffs[tmp_min_ind]][
+            0
+        ]
 
     sinogram_max_degree = np.multiply(sinogram_max_degree, np.divide(180.0, np.pi))
 
@@ -189,18 +200,19 @@ def calculate_max_min_lat_ap_hough(mask: np.ndarray, voxel_data: VoxelData):
     min_diffs = [
         min(angle[min_indices]),
         min([np.absolute(ang - np.divide(np.pi, 2.0)) for ang in angle[min_indices]]),
-        min([np.absolute(ang - np.pi) for ang in angle[min_indices]])
+        min([np.absolute(ang - np.pi) for ang in angle[min_indices]]),
     ]
     tmp_min_ind = min_diffs.index(min(min_diffs))
     if tmp_min_ind == 0:
-        sinogram_min_degree = [ang for ang in angle[min_indices]
-                               if ang == min_diffs[tmp_min_ind]][0]
+        sinogram_min_degree = [ang for ang in angle[min_indices] if ang == min_diffs[tmp_min_ind]][0]
     elif tmp_min_ind == 1:
-        sinogram_min_degree = [ang for ang in angle[min_indices]
-                               if np.absolute(ang - np.divide(np.pi, 2.0)) == min_diffs[tmp_min_ind]][0]
+        sinogram_min_degree = [
+            ang for ang in angle[min_indices] if np.absolute(ang - np.divide(np.pi, 2.0)) == min_diffs[tmp_min_ind]
+        ][0]
     else:
-        sinogram_min_degree = [ang for ang in angle[min_indices]
-                               if np.absolute(ang - np.pi) == min_diffs[tmp_min_ind]][0]
+        sinogram_min_degree = [ang for ang in angle[min_indices] if np.absolute(ang - np.pi) == min_diffs[tmp_min_ind]][
+            0
+        ]
     sinogram_min_degree = np.multiply(sinogram_min_degree, np.divide(180.0, np.pi))
 
     return SinogramData(
@@ -210,12 +222,12 @@ def calculate_max_min_lat_ap_hough(mask: np.ndarray, voxel_data: VoxelData):
         MinPixels=sinogram_min_px,
         MinCm=sinogram_min_cm,
         MinAngle=sinogram_min_degree,
-        EquivalentDiameter=np.sqrt(np.multiply(sinogram_max_cm, sinogram_min_cm))
+        EquivalentDiameter=np.sqrt(np.multiply(sinogram_max_cm, sinogram_min_cm)),
     )
 
 
 def calculate_max_min_lat_ap_radon(mask: np.ndarray, voxel_data: VoxelData) -> SinogramData:
-    """ Calculate the maximum and minimum distance through the patient/mask, and the angles at which they occur, using
+    """Calculate the maximum and minimum distance through the patient/mask, and the angles at which they occur, using
     the radon transform.
 
     Args:
@@ -244,17 +256,19 @@ def calculate_max_min_lat_ap_radon(mask: np.ndarray, voxel_data: VoxelData) -> S
     min_diffs = [
         min(max_indices),
         min([np.absolute(ang - 90.0) for ang in max_indices]),
-        min([np.absolute(ang - 180.0) for ang in max_indices])
+        min([np.absolute(ang - 180.0) for ang in max_indices]),
     ]
     tmp_min_ind = min_diffs.index(min(min_diffs))
     if tmp_min_ind == 0:
         sinogram_max_degree = float([ang for ang in max_indices if ang == min_diffs[tmp_min_ind]][0])
     elif tmp_min_ind == 1:
-        sinogram_max_degree = float([ang for ang in max_indices
-                                     if np.absolute(ang - 90.0) == min_diffs[tmp_min_ind]][0])
+        sinogram_max_degree = float(
+            [ang for ang in max_indices if np.absolute(ang - 90.0) == min_diffs[tmp_min_ind]][0]
+        )
     else:
-        sinogram_max_degree = float([ang for ang in max_indices
-                                     if np.absolute(ang - 180.0) == min_diffs[tmp_min_ind]][0])
+        sinogram_max_degree = float(
+            [ang for ang in max_indices if np.absolute(ang - 180.0) == min_diffs[tmp_min_ind]][0]
+        )
 
     sinogram_min_px = min(non_zero)
     sinogram_min_cm = np.multiply(sinogram_min_px, np.divide(voxel_data.y, 10.0))  # Assumes min patient size = AP
@@ -263,18 +277,19 @@ def calculate_max_min_lat_ap_radon(mask: np.ndarray, voxel_data: VoxelData) -> S
     min_diffs = [
         min(min_indices),
         min([np.absolute(ang - 90.0) for ang in min_indices]),
-        min([np.absolute(ang - 180.0) for ang in min_indices])
+        min([np.absolute(ang - 180.0) for ang in min_indices]),
     ]
     tmp_min_ind = min_diffs.index(min(min_diffs))
     if tmp_min_ind == 0:
-        sinogram_min_degree = float([ang for ang in min_indices
-                                     if ang == min_diffs[tmp_min_ind]][0])
+        sinogram_min_degree = float([ang for ang in min_indices if ang == min_diffs[tmp_min_ind]][0])
     elif tmp_min_ind == 1:
-        sinogram_min_degree = float([ang for ang in min_indices
-                                     if np.absolute(ang - 90.0) == min_diffs[tmp_min_ind]][0])
+        sinogram_min_degree = float(
+            [ang for ang in min_indices if np.absolute(ang - 90.0) == min_diffs[tmp_min_ind]][0]
+        )
     else:
-        sinogram_min_degree = float([ang for ang in min_indices
-                                     if np.absolute(ang - 180.0) == min_diffs[tmp_min_ind]][0])
+        sinogram_min_degree = float(
+            [ang for ang in min_indices if np.absolute(ang - 180.0) == min_diffs[tmp_min_ind]][0]
+        )
 
     return SinogramData(
         MaxPixels=sinogram_max_px,
@@ -283,14 +298,14 @@ def calculate_max_min_lat_ap_radon(mask: np.ndarray, voxel_data: VoxelData) -> S
         MinPixels=sinogram_min_px,
         MinCm=sinogram_min_cm,
         MinAngle=sinogram_min_degree,
-        EquivalentDiameter=np.sqrt(np.multiply(sinogram_max_cm, sinogram_min_cm))
+        EquivalentDiameter=np.sqrt(np.multiply(sinogram_max_cm, sinogram_min_cm)),
     )
 
 
-def calculate_area_equivalent_diameter(ct: CtSeries, use_radon: Optional[bool] = False,
-                                       use_hough: Optional[bool] = False) -> Tuple[
-    List[EquivalentDiameterData], Optional[List[SinogramData]], Optional[List[SinogramData]]]:
-    """ Calculate the area equivalent diameter for all slices in a CT series. The calculations are based on the
+def calculate_area_equivalent_diameter(
+    ct: CtSeries, use_radon: Optional[bool] = False, use_hough: Optional[bool] = False
+) -> Tuple[List[EquivalentDiameterData], Optional[List[SinogramData]], Optional[List[SinogramData]]]:
+    """Calculate the area equivalent diameter for all slices in a CT series. The calculations are based on the
     specifications in AAPM report 204 and 220.
 
     Args:
@@ -315,20 +330,23 @@ def calculate_area_equivalent_diameter(ct: CtSeries, use_radon: Optional[bool] =
     if ct.Mask is None:
         ct.get_patient_mask(remove_table=True)
 
-    ead_data = [_calculate_slice_area_equivalent_diameter(
-        ct.ImageVolume[:, :, ind], ct.Mask[:, :, ind], ct.VoxelData[ind])
-        for ind in range(ct.ImageVolume.shape[2])]
+    ead_data = [
+        _calculate_slice_area_equivalent_diameter(ct.ImageVolume[:, :, ind], ct.Mask[:, :, ind], ct.VoxelData[ind])
+        for ind in range(ct.ImageVolume.shape[2])
+    ]
 
     radon_data = None
     if use_radon:
-        radon_data = [calculate_max_min_lat_ap_radon(
-            mask=ct.Mask[:, :, ind], voxel_data=ct.VoxelData[ind])
-            for ind in range(ct.ImageVolume.shape[2])]
+        radon_data = [
+            calculate_max_min_lat_ap_radon(mask=ct.Mask[:, :, ind], voxel_data=ct.VoxelData[ind])
+            for ind in range(ct.ImageVolume.shape[2])
+        ]
 
     hough_data = None
     if use_hough:
-        hough_data = [calculate_max_min_lat_ap_radon(
-            mask=ct.Mask[:, :, ind], voxel_data=ct.VoxelData[ind])
-            for ind in range(ct.ImageVolume.shape[2])]
+        hough_data = [
+            calculate_max_min_lat_ap_radon(mask=ct.Mask[:, :, ind], voxel_data=ct.VoxelData[ind])
+            for ind in range(ct.ImageVolume.shape[2])
+        ]
 
     return ead_data, radon_data, hough_data

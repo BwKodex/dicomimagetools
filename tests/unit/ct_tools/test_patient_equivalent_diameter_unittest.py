@@ -1,14 +1,19 @@
-from dicom_image_tools.ct_tools.patient_equivalent_diameter import (
-    calculate_area_equivalent_diameter, calculate_max_min_lat_ap_hough, calculate_max_min_lat_ap_radon, SinogramData)
-from dicom_image_tools.helpers.voxel_data import VoxelData
-from dicom_image_tools.dicom_handlers.ct import CtSeries
 import numpy as np
 import pytest
+
+from dicom_image_tools.ct_tools.patient_equivalent_diameter import (
+    SinogramData,
+    calculate_area_equivalent_diameter,
+    calculate_max_min_lat_ap_hough,
+    calculate_max_min_lat_ap_radon,
+)
+from dicom_image_tools.dicom_handlers.ct import CtSeries
+from dicom_image_tools.helpers.voxel_data import VoxelData
 
 
 def test_calculate_area_equivalent_diameter_raises_typeerror_ct():
     with pytest.raises(TypeError):
-        calculate_area_equivalent_diameter(ct='Invalid argument')
+        calculate_area_equivalent_diameter(ct="Invalid argument")
 
 
 def test_calculate_area_equivalent_diameter_raises_typeerror_use_radon():
@@ -28,43 +33,51 @@ def test_calculate_max_min_lat_ap_hough_raises_typeerror_mask():
 
 
 def test_calculate_max_min_lat_ap_hough_raises_typeerror_mask_shape():
-    invalid_matrix = np.array([
-        [[0, 0, 0, 0, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 1, 0, 0, 0],
-         [0, 0, 1, 1, 1, 1, 1, 0, 0],
-         [0, 0, 1, 1, 1, 1, 1, 0, 0],
-         [0, 0, 1, 1, 1, 1, 1, 0, 0],
-         [0, 0, 0, 1, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 0, 0, 0, 0]],
-        [[0, 0, 0, 0, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 1, 0, 0, 0],
-         [0, 0, 1, 1, 1, 1, 1, 0, 0],
-         [0, 0, 1, 1, 1, 1, 1, 0, 0],
-         [0, 0, 1, 1, 1, 1, 1, 0, 0],
-         [0, 0, 0, 1, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 0, 0, 0, 0]]
-    ])
+    invalid_matrix = np.array(
+        [
+            [
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 1, 0, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 0, 1, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],
+            ],
+            [
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 1, 0, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 0, 1, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],
+            ],
+        ]
+    )
     voxel_data = VoxelData(x=1.0, y=1.0)
     with pytest.raises(TypeError):
         calculate_max_min_lat_ap_hough(mask=invalid_matrix, voxel_data=voxel_data)
 
 
 def test_calculate_max_min_lat_ap_hough():
-    matrix = np.array([
-        [0, 0, 0, 0, 1, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 1, 1, 1, 1, 1, 0, 0],
-        [0, 0, 1, 1, 1, 1, 1, 0, 0],
-        [0, 0, 1, 1, 1, 1, 1, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0, 0, 0],
-    ])
+    matrix = np.array(
+        [
+            [0, 0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0],
+        ]
+    )
 
     expected = SinogramData(
         MaxAngle=90,
@@ -73,7 +86,7 @@ def test_calculate_max_min_lat_ap_hough():
         MinAngle=0,
         MinCm=0.5,
         MinPixels=5,
-        EquivalentDiameter=np.sqrt(np.multiply(0.9, 0.5))
+        EquivalentDiameter=np.sqrt(np.multiply(0.9, 0.5)),
     )
 
     voxel_data = VoxelData(x=1.0, y=1.0)
@@ -90,43 +103,51 @@ def test_calculate_max_min_lat_ap_radon_raises_typeerror_mask():
 
 
 def test_calculate_max_min_lat_ap_radon_raises_typeerror_mask_shape():
-    invalid_matrix = np.array([
-        [[0, 0, 0, 0, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 1, 0, 0, 0],
-         [0, 0, 1, 1, 1, 1, 1, 0, 0],
-         [0, 0, 1, 1, 1, 1, 1, 0, 0],
-         [0, 0, 1, 1, 1, 1, 1, 0, 0],
-         [0, 0, 0, 1, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 0, 0, 0, 0]],
-        [[0, 0, 0, 0, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 1, 0, 0, 0],
-         [0, 0, 1, 1, 1, 1, 1, 0, 0],
-         [0, 0, 1, 1, 1, 1, 1, 0, 0],
-         [0, 0, 1, 1, 1, 1, 1, 0, 0],
-         [0, 0, 0, 1, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 0, 0, 0, 0]]
-    ])
+    invalid_matrix = np.array(
+        [
+            [
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 1, 0, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 0, 1, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],
+            ],
+            [
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 1, 0, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 0, 1, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0],
+            ],
+        ]
+    )
     voxel_data = VoxelData(x=1.0, y=1.0)
     with pytest.raises(TypeError):
         calculate_max_min_lat_ap_radon(mask=invalid_matrix, voxel_data=voxel_data)
 
 
 def test_calculate_max_min_lat_ap_radon():
-    matrix = np.array([
-        [0, 0, 0, 0, 1, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 1, 1, 1, 1, 1, 0, 0],
-        [0, 0, 1, 1, 1, 1, 1, 0, 0],
-        [0, 0, 1, 1, 1, 1, 1, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0, 0, 0],
-    ])
+    matrix = np.array(
+        [
+            [0, 0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0],
+        ]
+    )
 
     expected = SinogramData(
         MaxAngle=90,
@@ -135,7 +156,7 @@ def test_calculate_max_min_lat_ap_radon():
         MinAngle=0,
         MinCm=0.5,
         MinPixels=5,
-        EquivalentDiameter=np.sqrt(np.multiply(0.9, 0.5))
+        EquivalentDiameter=np.sqrt(np.multiply(0.9, 0.5)),
     )
 
     voxel_data = VoxelData(x=1.0, y=1.0)

@@ -4,7 +4,9 @@ import pytest
 from dicom_image_tools.dicom_handlers.dicom_series import DicomSeries
 
 
-def test_normalize_pixel_intensity_relationship_should_reverse_pixel_intensities_when_pixel_intensity_relationship_sign_is_negative(image_with_negative_pixel_intensity_relationship):
+def test_normalize_pixel_intensity_relationship_should_reverse_pixel_intensities_when_pixel_intensity_relationship_sign_is_negative(
+    image_with_negative_pixel_intensity_relationship,
+):
     # Arrange
     series = DicomSeries("TestSeries")
     series.CompleteMetadata.append(image_with_negative_pixel_intensity_relationship.get("metadata"))
@@ -19,7 +21,8 @@ def test_normalize_pixel_intensity_relationship_should_reverse_pixel_intensities
 
 
 def test_normalize_pixel_intensity_relationship_should_set_PixelIntensityNormailzed_to_True(
-        image_with_negative_pixel_intensity_relationship):
+    image_with_negative_pixel_intensity_relationship,
+):
     # Arrange
     series = DicomSeries("TestSeries")
     series.CompleteMetadata.append(image_with_negative_pixel_intensity_relationship.get("metadata"))
@@ -35,7 +38,8 @@ def test_normalize_pixel_intensity_relationship_should_set_PixelIntensityNormail
 
 
 def test_normalize_pixel_intensity_relationship_should_return_do_nothing_if_PixelIntensityNormailzed_is_True(
-        image_with_negative_pixel_intensity_relationship):
+    image_with_negative_pixel_intensity_relationship,
+):
     # Arrange
     series = DicomSeries("TestSeries")
     series.CompleteMetadata.append(image_with_negative_pixel_intensity_relationship.get("metadata"))
@@ -51,7 +55,8 @@ def test_normalize_pixel_intensity_relationship_should_return_do_nothing_if_Pixe
 
 
 def test_normalize_pixel_intensity_relationship_should_return_do_nothing_if_PixelIntensityRelationshipSign_is_1(
-        image_with_negative_pixel_intensity_relationship):
+    image_with_negative_pixel_intensity_relationship,
+):
     # Arrange
     series = DicomSeries("TestSeries")
     series.CompleteMetadata.append(image_with_negative_pixel_intensity_relationship.get("metadata"))
@@ -67,7 +72,8 @@ def test_normalize_pixel_intensity_relationship_should_return_do_nothing_if_Pixe
 
 
 def test_normalize_pixel_intensity_relationship_raises_ValueError_if_image_volume_is_not_imported(
-        image_with_negative_pixel_intensity_relationship):
+    image_with_negative_pixel_intensity_relationship,
+):
     # Arrange
     series = DicomSeries("TestSeries")
     series.CompleteMetadata.append(image_with_negative_pixel_intensity_relationship.get("metadata"))

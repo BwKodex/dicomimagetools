@@ -1,11 +1,10 @@
 import numpy as np
+import pytest
 from scipy.stats import sem
 from skimage import color
-import pytest
 
 from dicom_image_tools.helpers.voxel_data import VoxelData
-from dicom_image_tools.roi.square_roi import SquareRoi, VALID_COLOURS
-
+from dicom_image_tools.roi.square_roi import VALID_COLOURS, SquareRoi
 
 test_image = np.array(
     [
@@ -49,7 +48,7 @@ def test_square_roi_creation():
 def test_square_roi_creation_widht_pixel_size():
     center = dict(x=6, y=6, z=None)
     voxel_data = VoxelData(x=0.5, y=0.5, z=None)
-    square_roi = SquareRoi(center=center, height=6, width=6, pixel_size=voxel_data,roi_size_in_pixels=True)
+    square_roi = SquareRoi(center=center, height=6, width=6, pixel_size=voxel_data, roi_size_in_pixels=True)
     assert square_roi.Center.x == 6
     assert square_roi.Center.y == 6
     assert square_roi.Center.z is None
@@ -79,7 +78,7 @@ def test_upper_left_outside():
     voxel_data = VoxelData(x=1.0, y=1.0, z=None)
     with pytest.raises(ValueError) as exc_info:
         SquareRoi(center=center, height=5, width=5, pixel_size=voxel_data)
-    assert 'upper left corner' in str(exc_info.value)
+    assert "upper left corner" in str(exc_info.value)
 
 
 def test_upper_left_outside_resize():
@@ -136,7 +135,7 @@ def test_get_mean_too_big_roi_no_resize():
 
 
 def test_get_stdev():
-    expected_stdev = np.std(test_image[5:7 + 1, 5:7 + 1])
+    expected_stdev = np.std(test_image[5 : 7 + 1, 5 : 7 + 1])
 
     center = dict(x=6, y=6, z=None)
     voxel_data = VoxelData(x=1.0, y=1.0, z=None)
@@ -165,7 +164,7 @@ def test_get_stdev_too_big_roi_no_resize():
 
 
 def test_get_sum():
-    expected_stdev = sum(np.sum(test_image[5:7 + 1, 5:7 + 1], axis=1))
+    expected_stdev = sum(np.sum(test_image[5 : 7 + 1, 5 : 7 + 1], axis=1))
 
     center = dict(x=6, y=6, z=None)
     voxel_data = VoxelData(x=1.0, y=1.0, z=None)
@@ -194,7 +193,7 @@ def test_get_sum_too_big_roi_no_resize():
 
 
 def test_get_standard_error_of_them_mean():
-    expected = sem(test_image[5:7 + 1, 5:7 + 1].flatten())
+    expected = sem(test_image[5 : 7 + 1, 5 : 7 + 1].flatten())
 
     center = dict(x=6, y=6, z=None)
     voxel_data = VoxelData(x=1.0, y=1.0, z=None)
@@ -204,7 +203,7 @@ def test_get_standard_error_of_them_mean():
 
 
 def test_get_standard_error_of_them_mean_too_big_roi_resize():
-    expected = sem(test_image[10:12 + 1, 10:12 + 1].flatten())
+    expected = sem(test_image[10 : 12 + 1, 10 : 12 + 1].flatten())
 
     center = dict(x=12, y=12, z=None)
     voxel_data = VoxelData(x=1.0, y=1.0, z=None)
@@ -223,7 +222,7 @@ def test_get_standard_error_of_them_mean_too_big_roi_no_resize():
 
 
 def test_add_roi_to_image_unallowed_color():
-    center = dict( x=6, y=6, z=None)
+    center = dict(x=6, y=6, z=None)
     voxel_data = VoxelData(x=1.0, y=1.0, z=None)
     square_roi = SquareRoi(center=center, height=3, width=3, pixel_size=voxel_data)
     with pytest.raises(ValueError):
@@ -231,7 +230,7 @@ def test_add_roi_to_image_unallowed_color():
 
 
 def test_add_roi_to_image():
-    roi_color = 'SkyBlue'
+    roi_color = "SkyBlue"
     expected = color.gray2rgb(test_image)
     expected[4:8, 4:8] = VALID_COLOURS[roi_color]
 

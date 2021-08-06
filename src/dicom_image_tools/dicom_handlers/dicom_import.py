@@ -1,17 +1,18 @@
 import logging
 from pathlib import Path
-import pydicom
-from pydicom.errors import InvalidDicomError
 from typing import Dict
 
-from .dicom_study import DicomStudy
+import pydicom
+from pydicom.errors import InvalidDicomError
+
 from .ct import CtSeries
+from .dicom_study import DicomStudy
 
 logger = logging.getLogger(__name__)
 
 
 def import_dicom_from_folder(folder: Path, recursively: bool = True) -> Dict[str, DicomStudy]:
-    """ Go through a folder and import all valid DICOM images found
+    """Go through a folder and import all valid DICOM images found
 
     Args:
         folder: Path object of the folder to search for DICOM files
@@ -62,7 +63,7 @@ def import_dicom_from_folder(folder: Path, recursively: bool = True) -> Dict[str
 
 
 def import_dicom_file(file: Path) -> DicomStudy:
-    """ Import a DICOM file into a DicomStudy object
+    """Import a DICOM file into a DicomStudy object
 
     Args:
         file: Path to the file to import

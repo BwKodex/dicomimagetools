@@ -1,21 +1,21 @@
-from datetime import datetime
 import logging
+from datetime import datetime
+from pathlib import Path
+from typing import Any, List, Optional
 
 import numpy as np
-from pathlib import Path
 import pydicom
 from pydicom import FileDataset
-from typing import List, Optional, Any
 
-from .dicom_series import DicomSeries
 from ..helpers.pixel_data import get_pixel_array
 from ..helpers.voxel_data import VoxelData
+from .dicom_series import DicomSeries
 
 logger = logging.getLogger(__name__)
 
 
 class ProjectionSeries(DicomSeries):
-    """ A class to manage 2D DICOM images, e.g., from conventional X-rays, mammography, panoramic, intraoral etc.
+    """A class to manage 2D DICOM images, e.g., from conventional X-rays, mammography, panoramic, intraoral etc.
 
     This class only handles one image per series, as is usually the case for this kind of images.
 
@@ -31,24 +31,25 @@ class ProjectionSeries(DicomSeries):
         ManufacturersModelName: The model name specified by the manufacturer as given in the DICOM file
 
     """
+
     def __init__(self, file: Path, dcm: Optional[FileDataset] = None):
         if dcm is None:
             dcm = pydicom.dcmread(fp=str(file.absolute()), stop_before_pixels=True)
 
-        if 'SeriesInstanceUID' not in dcm:
+        if "SeriesInstanceUID" not in dcm:
             raise ValueError("The DICOM file does not contain a series instance UID")
 
         super().__init__(series_instance_uid=dcm.SeriesInstanceUID)
 
         self.Modality = dcm.Modality
         self.Manufacturer: Optional[str] = None
-        if 'Manufacturer' in dcm:
+        if "Manufacturer" in dcm:
             self.Manufacturer = dcm.Manufacturer
 
         self.ManufacturersModelName: Optional[str] = None
-        if 'ManufacturerModelName' in dcm:
+        if "ManufacturerModelName" in dcm:
             self.ManufacturersModelName = dcm.ManufacturerModelName
-        if self.Modality == 'IO' and 'DetectorManufacturerModelName' in dcm:
+        if self.Modality == "IO" and "DetectorManufacturerModelName" in dcm:
             self.ManufacturersModelName = dcm.DetectorManufacturerModelName
 
         self.kV: Optional[List[Optional[float]]] = []
@@ -59,7 +60,7 @@ class ProjectionSeries(DicomSeries):
         self.add_file(file=file, dcm=dcm)
 
     def add_file(self, file: Path, dcm: Optional[FileDataset] = None):
-        """ Add a file to the objects list of files
+        """Add a file to the objects list of files
 
         First performs a check that the file path is of a path object and that it has the same series instance UID as
         the class object
@@ -85,36 +86,35 @@ class ProjectionSeries(DicomSeries):
         if dcm is None:
             dcm = pydicom.dcmread(fp=str(file.absolute()), stop_before_pixels=True)
 
-        if 'PixelSpacing' in dcm:
-            self.VoxelData.append(VoxelData(x=float(dcm.PixelSpacing[1]),
-                                            y=float(dcm.PixelSpacing[0]),
-                                            z=None))
+        if "PixelSpacing" in dcm:
+            self.VoxelData.append(VoxelData(x=float(dcm.PixelSpacing[1]), y=float(dcm.PixelSpacing[0]), z=None))
         else:
             # Assume pixel size is set in Detector Element Spacing tag (0018, 7022)
-            self.VoxelData.append(VoxelData(x=float(dcm.DetectorElementSpacing[1]),
-                                            y=float(dcm.DetectorElementSpacing[0]),
-                                            z=None))
+            self.VoxelData.append(
+                VoxelData(x=float(dcm.DetectorElementSpacing[1]), y=float(dcm.DetectorElementSpacing[0]), z=None)
+            )
 
         self.kV.append(self._get_tag_value_as_float_or_none("KVP", ds=dcm))
 
-        if 'XRayTubeCurrent' in dcm:
+        if "XRayTubeCurrent" in dcm:
             self.mA.append(float(dcm.XRayTubeCurrent))
-        elif 'XRayTubeCurrentInmA' in dcm:
+        elif "XRayTubeCurrentInmA" in dcm:
             self.mA.append(float(dcm.XRayTubeCurrentInmA))
-        elif 'XRayTubeCurrentInuA' in dcm:
+        elif "XRayTubeCurrentInuA" in dcm:
             self.mA.append(float(dcm.XRayTubeCurrentInuA) / 1000)
         else:
             self.mA.append(None)
 
-        self.ms.append(self._get_tag_value_as_float_or_none('ExposureTime', ds=dcm))
+        self.ms.append(self._get_tag_value_as_float_or_none("ExposureTime", ds=dcm))
 
         # Remove pixel data part of dcm to decrease memory used for the object
-        if 'PixelData' in dcm:
+        if "PixelData" in dcm:
             try:
                 del dcm[0x7FE00010]
             except Exception:
-                logger.warning("Failed to remove pixel data from file before appending to CompleteMetadata",
-                               exc_info=True)
+                logger.warning(
+                    "Failed to remove pixel data from file before appending to CompleteMetadata", exc_info=True
+                )
                 pass
 
         self.CompleteMetadata.append(dcm)
@@ -129,7 +129,7 @@ class ProjectionSeries(DicomSeries):
         return float(tag_value)
 
     def import_image(self) -> None:
-        """ Import the pixel data into the ImageVolume property
+        """Import the pixel data into the ImageVolume property
 
         Returns:
 
@@ -148,19 +148,16 @@ class ProjectionSeries(DicomSeries):
         Returns:
 
         """
-        file_order = [ind for ind in list(
-            np.argsort(
-                np.array(
-                    [self._get_acquisition_time(ds) for ds in self.CompleteMetadata]
-                )
-            )
-        )]
+        file_order = [
+            ind for ind in list(np.argsort(np.array([self._get_acquisition_time(ds) for ds in self.CompleteMetadata])))
+        ]
 
         self.kV = self._reorder_list_by_index_order_list(order_list=file_order, list_to_order=self.kV)
         self.mA = self._reorder_list_by_index_order_list(order_list=file_order, list_to_order=self.mA)
         self.ms = self._reorder_list_by_index_order_list(order_list=file_order, list_to_order=self.ms)
-        self.CompleteMetadata = self._reorder_list_by_index_order_list(order_list=file_order,
-                                                                       list_to_order=self.CompleteMetadata)
+        self.CompleteMetadata = self._reorder_list_by_index_order_list(
+            order_list=file_order, list_to_order=self.CompleteMetadata
+        )
         self.FilePaths = self._reorder_list_by_index_order_list(order_list=file_order, list_to_order=self.FilePaths)
         self.ImageVolume = self._reorder_list_by_index_order_list(order_list=file_order, list_to_order=self.ImageVolume)
 
