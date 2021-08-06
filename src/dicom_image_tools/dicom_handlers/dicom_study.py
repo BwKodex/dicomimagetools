@@ -1,9 +1,13 @@
 from pathlib import Path
-import pydicom
-from pydicom import FileDataset
 from typing import List, Optional, Union
 
-from ..constants.SopClassUids import RADIATION_DOSE_STRUCTURED_REPORT_SOP_CLASS_UIDS, SECONDARY_CAPTURE_SOP_CLASS_UIDS
+import pydicom
+from pydicom import FileDataset
+
+from ..constants.SopClassUids import (
+    RADIATION_DOSE_STRUCTURED_REPORT_SOP_CLASS_UIDS,
+    SECONDARY_CAPTURE_SOP_CLASS_UIDS,
+)
 from .ct import CtSeries
 from .dicom_series import DicomSeries
 from .dose_report_class import DoseReport
@@ -11,7 +15,7 @@ from .projection import ProjectionSeries
 
 
 class DicomStudy:
-    """ A class to manage DICOM files connected by a Study Instance UID
+    """A class to manage DICOM files connected by a Study Instance UID
 
     Args:
         study_instance_uid : The study instance UID of the DICOM study object that is to be created
@@ -26,6 +30,7 @@ class DicomStudy:
         TypeError: if study_instance_uid is not a string
 
     """
+
     def __init__(self, study_instance_uid: str):
         if not isinstance(study_instance_uid, str):
             raise TypeError("study_instance_uid must be a string")
@@ -37,7 +42,7 @@ class DicomStudy:
         self.DoseReports: Optional[DoseReport] = DoseReport()
 
     def add_file(self, file: Path, dcm: Optional[FileDataset] = None) -> None:
-        """ Add the DICOM file to the DicomStudy object after validating the study instance UID
+        """Add the DICOM file to the DicomStudy object after validating the study instance UID
 
         Args:
             file: Path to where the file to be added is stored on disc

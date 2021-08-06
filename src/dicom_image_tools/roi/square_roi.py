@@ -1,16 +1,15 @@
+from math import floor
+from typing import Optional
+
 import numpy as np
 from scipy.stats import sem
 from skimage import color
 
-from .roi import Roi, CenterPosition
 from ..helpers.point import IntPoint
 from ..helpers.voxel_data import VoxelData
+from .roi import CenterPosition, Roi
 
-
-VALID_COLOURS = {
-    'SkyBlue': (135, 206, 235),
-    'MediumBlue': (0, 0, 205)
-}
+VALID_COLOURS = {"SkyBlue": (135, 206, 235), "MediumBlue": (0, 0, 205)}
 
 
 class SquareRoi(Roi):
@@ -46,36 +45,50 @@ class SquareRoi(Roi):
         Returns a numpy ndarray only containing the part of the image that is contained in the ROI
     """
 
-    def __init__(self, center: CenterPosition, height: float, width: float, pixel_size: VoxelData,
-                 resize_too_big_roi: bool = False):
+    def __init__(
+        self,
+        center: CenterPosition,
+        height: float,
+        width: float,
+        pixel_size: VoxelData,
+        resize_too_big_roi: bool = False,
+        roi_size_in_pixels: Optional[bool] = False,
+    ):
         super().__init__(center=center)
-        self.Height: float = height
-        self.Width: float = width
+        self.HeightInPixels: float = height if roi_size_in_pixels else int(floor(height / pixel_size.y + 0.5))
+        self.WidthInPixels: float = width if roi_size_in_pixels else int(floor(width / pixel_size.x + 0.5))
+        self.Height: float = int(floor(height * pixel_size.y + 0.5)) if roi_size_in_pixels else height
+        self.Width: float = int(floor(width * pixel_size.x + 0.5)) if roi_size_in_pixels else width
         self.ResizeTooBigRoi: bool = resize_too_big_roi
 
-        height_pixels = int(round(self.Height / pixel_size.y))
-        width_pixels = int(round(self.Width / pixel_size.x))
+        if self.HeightInPixels < 1 or self.WidthInPixels < 1:
+            raise ValueError(
+                (
+                    f"Too small ROI size specified. Both width ({self.WidthInPixels}) and height "
+                    f"({self.HeightInPixels}) must be at least 1 pixel"
+                )
+            )
 
-        if height_pixels < 1 or width_pixels < 1:
-            raise ValueError((f'Too small ROI size specified. Both width ({width_pixels}) and height ({height_pixels}) '
-                              f'must be at least 1 pixel'))
-
-        height_pixels = int(round((self.Height - pixel_size.y) / pixel_size.y))
+        height_pixels = int(floor(self.HeightInPixels - 1))
         if height_pixels < 0:
             height_pixels = 0
-        width_pixels = int(round((self.Width - pixel_size.x) / pixel_size.x))
+        width_pixels = int(floor(self.WidthInPixels - 1))
         if width_pixels < 0:
             width_pixels = 0
 
         self.UpperLeft: IntPoint = IntPoint(
             x=int(np.floor(self.Center.x - (width_pixels / 2) + 0.5)),
-            y=int(np.floor(self.Center.y - (height_pixels / 2) + 0.5))
+            y=int(np.floor(self.Center.y - (height_pixels / 2) + 0.5)),
         )
         # Validate corner does not have negative index
         if self.UpperLeft.x < 0 or self.UpperLeft.y < 0:
             if not resize_too_big_roi:
-                raise ValueError(("The upper left corner of the ROI reaches outside of the image "
-                                  f"(x = {self.UpperLeft.x}, y = {self.UpperLeft.y})"))
+                raise ValueError(
+                    (
+                        "The upper left corner of the ROI reaches outside of the image "
+                        f"(x = {self.UpperLeft.x}, y = {self.UpperLeft.y})"
+                    )
+                )
             if self.UpperLeft.x < 0:
                 self.UpperLeft.x = 0
             if self.UpperLeft.y < 0:
@@ -83,19 +96,21 @@ class SquareRoi(Roi):
 
         self.LowerLeft: IntPoint = IntPoint(
             x=int(np.floor(self.Center.x - (width_pixels / 2) + 0.5)),
-            y=int(np.floor(self.Center.y + (height_pixels / 2) + 0.5))
+            y=int(np.floor(self.Center.y + (height_pixels / 2) + 0.5)),
         )
 
         self.UpperRight: IntPoint = IntPoint(
             x=int(np.floor(self.Center.x + (width_pixels / 2) + 0.5)),
-            y=int(np.floor(self.Center.y - (height_pixels / 2) + 0.5)))
+            y=int(np.floor(self.Center.y - (height_pixels / 2) + 0.5)),
+        )
 
         self.LowerRight: IntPoint = IntPoint(
             x=int(np.floor(self.Center.x + (width_pixels / 2) + 0.5)),
-            y=int(np.floor(self.Center.y + (height_pixels / 2) + 0.5)))
+            y=int(np.floor(self.Center.y + (height_pixels / 2) + 0.5)),
+        )
 
     def _check_roi_placement(self, image: np.ndarray) -> (int, int):
-        """ Checks that the ROI is inside the given image. If not raise Value error or if ResizeTooBigRoi == True,
+        """Checks that the ROI is inside the given image. If not raise Value error or if ResizeTooBigRoi == True,
         calculate new ending indexes.
 
         :param image: Numpy ndarray containing the image
@@ -120,27 +135,27 @@ class SquareRoi(Roi):
         return x2, y2
 
     def get_mean(self, image: np.ndarray) -> np.ndarray:
-        """ Calculates the mean of the pixel values contained in the ROI from the input image
+        """Calculates the mean of the pixel values contained in the ROI from the input image
 
         :param image: Numpy ndarray containing the image
         :return: The mean of the pixel values from the part of the input image contained in the ROI
         """
         x2, y2 = self._check_roi_placement(image=image)
 
-        return np.mean(image[self.UpperLeft.y:y2 + 1, self.UpperLeft.x:x2 + 1])
+        return np.mean(image[self.UpperLeft.y : y2 + 1, self.UpperLeft.x : x2 + 1])
 
     def get_stdev(self, image: np.ndarray) -> np.ndarray:
-        """ Calculates the standard deviation of the pixel values contained in the ROI from the input image
+        """Calculates the standard deviation of the pixel values contained in the ROI from the input image
 
         :param image: Numpy ndarray containing the image
         :return: The standard deviation of the pixel values from the part of the input image contained in the ROI
         """
         x2, y2 = self._check_roi_placement(image=image)
 
-        return np.std(image[self.UpperLeft.y:y2 + 1, self.UpperLeft.x:x2 + 1])
+        return np.std(image[self.UpperLeft.y : y2 + 1, self.UpperLeft.x : x2 + 1])
 
     def get_sum(self, image: np.ndarray, axis: int = 1):
-        """ Calculates the sum of the pixel values contained in the ROI from the input image
+        """Calculates the sum of the pixel values contained in the ROI from the input image
 
         :param image: Numpy ndarray containing the image
         :param axis: The axis over which to calculate the sum
@@ -148,10 +163,10 @@ class SquareRoi(Roi):
         """
         x2, y2 = self._check_roi_placement(image=image)
 
-        return np.sum(a=image[self.UpperLeft.y:y2 + 1, self.UpperLeft.x:x2 + 1], axis=axis)
+        return np.sum(a=image[self.UpperLeft.y : y2 + 1, self.UpperLeft.x : x2 + 1], axis=axis)
 
     def get_std_error_of_the_mean(self, image: np.ndarray) -> np.ndarray:
-        """ Calculates the standard error of the mean of the pixel values contained in the ROI from the input image
+        """Calculates the standard error of the mean of the pixel values contained in the ROI from the input image
 
         :param image: Numpy ndarray containing the image
         :return: The standard error of the mean of the pixel values from the part of the input image contained in the
@@ -159,10 +174,10 @@ class SquareRoi(Roi):
         """
         x2, y2 = self._check_roi_placement(image=image)
 
-        return sem(image[self.UpperLeft.y:y2 + 1, self.UpperLeft.x:x2 + 1].flatten())
+        return sem(image[self.UpperLeft.y : y2 + 1, self.UpperLeft.x : x2 + 1].flatten())
 
-    def add_roi_to_image(self, image: np.ndarray, roi_color: str = 'SkyBlue') -> np.ndarray:
-        """ Adds the ROI to the given image using the color specified.
+    def add_roi_to_image(self, image: np.ndarray, roi_color: str = "SkyBlue") -> np.ndarray:
+        """Adds the ROI to the given image using the color specified.
 
         :param image: Numpy ndarray containing the image
         :param roi_color: The color to use for the ROI
@@ -177,15 +192,15 @@ class SquareRoi(Roi):
 
         image = color.gray2rgb(image)
 
-        image[self.UpperLeft.y:y2 + 1, self.UpperLeft.x:x2 + 1] = roi_color
+        image[self.UpperLeft.y : y2 + 1, self.UpperLeft.x : x2 + 1] = roi_color
         return image
 
     def get_roi_part_of_image(self, image: np.ndarray) -> np.ndarray:
-        """ Extracts the part of the image contained in the ROI
+        """Extracts the part of the image contained in the ROI
 
         :param image: Numpy ndarray containing the image
         :return: The part of the input image contained in the square ROI as a numpy ndarray
         """
         x2, y2 = self._check_roi_placement(image=image)
 
-        return image[self.UpperLeft.y:y2 + 1, self.UpperLeft.x:x2 + 1]
+        return image[self.UpperLeft.y : y2 + 1, self.UpperLeft.x : x2 + 1]

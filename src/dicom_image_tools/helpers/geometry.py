@@ -1,10 +1,31 @@
-from numpy import (abs, absolute, add, arctan, array, ceil, clip, divide, exp, median, multiply, ones, pi, power, sort,
-                   sqrt, subtract, sum, vectorize, zeros)
-from scipy import linalg
-from scipy.optimize import curve_fit
 from typing import List, Optional, Tuple, Union
 
-from .point import Point, IntPoint
+from numpy import (
+    abs,
+    absolute,
+    add,
+    arctan,
+    array,
+    ceil,
+    clip,
+    divide,
+    exp,
+    median,
+    multiply,
+    ones,
+    pi,
+    power,
+    sort,
+    sqrt,
+    subtract,
+    sum,
+    vectorize,
+    zeros,
+)
+from scipy import linalg
+from scipy.optimize import curve_fit
+
+from .point import IntPoint, Point
 
 LINE_COORDINATE = Union[int, float]
 FIT_DATA = Union
@@ -43,7 +64,7 @@ def third_deg_polynomial_fit_func(x, a, b, c, d):
 
 
 def get_third_degree_polynomial_fit(x: List[Union[float, int]], y: List[Union[float, int]]):
-    """ Fits data to a 3rd degree polynomial on the format y = a*x^3 + b*x^2 + c*x + d. Returns y-values calculated with
+    """Fits data to a 3rd degree polynomial on the format y = a*x^3 + b*x^2 + c*x + d. Returns y-values calculated with
     the optimized function and the z, b, c, and d parameters in a dict.
 
     Args:
@@ -70,8 +91,9 @@ def _test_function(x, x1, ind):
     return output
 
 
-def lowess(x: List[Union[float, int]], y: List[Union[float, int]], f: Optional[float] = 2. / 3.,
-           iter: Optional[int] = 3):
+def lowess(
+    x: List[Union[float, int]], y: List[Union[float, int]], f: Optional[float] = 2.0 / 3.0, iter: Optional[int] = 3
+):
     """lowess(x, y, f=2./3., iter=3) -> yest
     Lowess smoother: Robust locally weighted regression.
     The lowess function fits a nonparametric regression curve to a scatterplot.
@@ -94,8 +116,9 @@ def lowess(x: List[Union[float, int]], y: List[Union[float, int]], f: Optional[f
         for i in range(n):
             weights = multiply(delta, w[:, i])
             b = array([sum(multiply(weights, y)), sum(multiply(weights, multiply(y, x)))])
-            A = array([[sum(weights), sum(multiply(weights, x))],
-                       [sum(weights * x), sum(multiply(multiply(weights, x), x))]])
+            A = array(
+                [[sum(weights), sum(multiply(weights, x))], [sum(weights * x), sum(multiply(multiply(weights, x), x))]]
+            )
             beta = linalg.solve(A, b)
             yest[i] = add(beta[0], multiply(beta[1], x[i]))
 

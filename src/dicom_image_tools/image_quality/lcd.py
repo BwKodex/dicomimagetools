@@ -1,7 +1,8 @@
 import logging
+from typing import Dict, List, Optional, Union
+
 import numpy as np
 from scipy.stats import sem
-from typing import Dict, List, Optional, Union
 
 from ..helpers.point import Point
 from ..helpers.voxel_data import VoxelData
@@ -15,7 +16,7 @@ log = logging.getLogger(__name__)
 
 
 def lcd_statistical(stderr: FloatListType) -> FloatListType:
-    """ Implements a statistical method for determining the low contrast detectability (LCD) as mentioned in
+    """Implements a statistical method for determining the low contrast detectability (LCD) as mentioned in
     "A STATISTICAL METHOD FOR LOW-CONTRAST DETECTABILITY ANALYSIS IN ANGIOGRAPHY SYSTEMS. A. Radice, N. Paruccini,
     C. Spadavecchia, R. Villa, A. Baglivi and A. Crespi (2016) Physica Medica (32).
     https://doi.org/10.1016/j.ejmp.2016.07.728" This specifies that the low contrast detectability as 3.29 x sigma,
@@ -37,15 +38,20 @@ def lcd_statistical(stderr: FloatListType) -> FloatListType:
     return [LCD_CONSTANT * val for val in stderr]
 
 
-def lcd_statistical_random(analysis_matrix: np.ndarray, pixel_size: VoxelData, object_size: float,
-                           rois: Optional[int] = 1000) -> Dict[str, Union[str, float, List[float]]]:
-    """ Implements a statistical method for determining the low contrast detectability (LCD) or low contrast limit (LCL)
+def lcd_statistical_random(
+    analysis_matrix: np.ndarray,
+    pixel_size: VoxelData,
+    object_size: float,
+    rois: Optional[int] = 1000,
+    return_rois: Optional[bool] = False,
+) -> Dict[str, Union[str, float, List[float]]]:
+    """Implements a statistical method for determining the low contrast detectability (LCD) or low contrast limit (LCL)
 
     Args:
         analysis_matrix: Matrix of the homogeneous image area that is to be analysed
         pixel_size: The voxel data for the analysis_matrix
         object_size: The side of the object to analyse for in mm
-        rois: The number of rois to include in the analysis
+        rois: The number of ROIs to include in the analysis
 
     Returns:
         Dictionary containing the mean, standard deviation, standard error and LCD on the form
@@ -57,6 +63,7 @@ def lcd_statistical_random(analysis_matrix: np.ndarray, pixel_size: VoxelData, o
           'SD': float,                           # Standard deviation
           'Error SD': float,                     # Standard error of the standard deviation
           'Perc contrast At 95 Perc CL': float,  # Percent contrast at 95% contrast level
+          'ROIs': Optional[List[SquareRoi]],     # A list of all ROIs used or None
         }
 
     """
@@ -73,22 +80,23 @@ def lcd_statistical_random(analysis_matrix: np.ndarray, pixel_size: VoxelData, o
         raise TypeError("The number of ROIs (rois) must be an integer")
 
     output = {
-        'Hole Diameter': f'{object_size:.2f}mm',
-        'ROI Box Size': f'{int(np.floor(object_size / pixel_size.x))}pixel',
-        'Mean': float(),
-        'Std Error Mean': float(),
-        'SD': float(),
-        'Error SD': float(),
-        'Perc Contrast At 95 Perc CL': float()
+        "Hole Diameter": f"{object_size:.2f}mm",
+        "ROI Box Size": f"{int(np.floor(object_size / pixel_size.x))}pixel",
+        "Mean": float(),
+        "Std Error Mean": float(),
+        "SD": float(),
+        "Error SD": float(),
+        "Perc Contrast At 95 Perc CL": float(),
     }
 
     result = {
-        'Mean': [],
-        'SD': [],
-        'Std Error Mean': []
+        "Mean": [],
+        "SD": [],
+        "Std Error Mean": [],
+        "ROIs": [],
     }
 
-    log.info(f'Calculating LCD from a set of {rois} ROIs of size {object_size:.3f} mm')
+    log.info(f"Calculating LCD from a set of {rois} ROIs of size {object_size:.3f} mm")
 
     # Place ROIs and get ROI statistics
     roi_size = [np.floor(np.divide(object_size, pixel_size.x)), np.floor(np.divide(object_size, pixel_size.y))]
@@ -99,13 +107,18 @@ def lcd_statistical_random(analysis_matrix: np.ndarray, pixel_size: VoxelData, o
     for col in range(np.int(structured_rois[0])):
         for row in range(np.int(structured_rois[1])):
             roi = SquareRoi(
-                center=Point(x=int(col * roi_size[0] + np.ceil(roi_size[0] / 2)),
-                             y=int(row * roi_size[1] + np.ceil(roi_size[1] / 2))),
-                height=object_size, width=object_size, pixel_size=pixel_size, resize_too_big_roi=True
+                center=Point(
+                    x=int(col * roi_size[0] + np.ceil(roi_size[0] / 2)),
+                    y=int(row * roi_size[1] + np.ceil(roi_size[1] / 2)),
+                ),
+                height=object_size,
+                width=object_size,
+                pixel_size=pixel_size,
+                resize_too_big_roi=True,
             )
-            result['Mean'].append(roi.get_mean(analysis_matrix))
-            result['SD'].append(roi.get_stdev(analysis_matrix))
-            result['Std Error Mean'].append(roi.get_std_error_of_the_mean(analysis_matrix))
+            result["Mean"].append(roi.get_mean(analysis_matrix))
+            result["SD"].append(roi.get_stdev(analysis_matrix))
+            result["Std Error Mean"].append(roi.get_std_error_of_the_mean(analysis_matrix))
 
     if random_rois > 0:
         # Determine the mean value and standard deviation in a set of randomly placed ROIs
@@ -116,9 +129,12 @@ def lcd_statistical_random(analysis_matrix: np.ndarray, pixel_size: VoxelData, o
                 roi = SquareRoi(
                     center=Point(
                         x=int(np.random.randint(0, analysis_matrix.shape[1]) + np.ceil(np.divide(roi_size[0], 2))),
-                        y=int(np.random.randint(0, analysis_matrix.shape[0]) + np.ceil(np.divide(roi_size[1], 2)))
+                        y=int(np.random.randint(0, analysis_matrix.shape[0]) + np.ceil(np.divide(roi_size[1], 2))),
                     ),
-                    height=object_size, width=object_size, pixel_size=pixel_size, resize_too_big_roi=True
+                    height=object_size,
+                    width=object_size,
+                    pixel_size=pixel_size,
+                    resize_too_big_roi=True,
                 )
                 tmp_mean = roi.get_mean(analysis_matrix)
                 tmp_sd = roi.get_stdev(analysis_matrix)
@@ -128,15 +144,19 @@ def lcd_statistical_random(analysis_matrix: np.ndarray, pixel_size: VoxelData, o
                 valid_roi = not np.isnan(tmp_mean) and not np.isnan(tmp_sd) and not np.isnan(tmp_sem)
 
             if valid_roi:
-                result['Mean'].append(tmp_mean)
-                result['SD'].append(tmp_sd)
-                result['Std Error Mean'].append(tmp_sem)
+                result["Mean"].append(tmp_mean)
+                result["SD"].append(tmp_sd)
+                result["Std Error Mean"].append(tmp_sem)
+                result["ROIs"].append(roi)
 
     # Calculate the mean value and related values from the ROIs
-    output['Mean'] = np.mean(result['Mean'])
-    output['Std Error Mean'] = np.mean(result['Std Error Mean'])
-    output['SD'] = np.mean(result['SD'])
-    output['Error SD'] = sem(result['SD'])
-    output['Perc Contrast At 95 Perc CL'] = lcd_statistical(stderr=output['Std Error Mean'])
+    output["Mean"] = np.mean(result["Mean"])
+    output["Std Error Mean"] = np.mean(result["Std Error Mean"])
+    output["SD"] = np.mean(result["SD"])
+    output["Error SD"] = sem(result["SD"])
+    output["Perc Contrast At 95 Perc CL"] = lcd_statistical(stderr=output["Std Error Mean"])
+
+    if return_rois:
+        output["ROIs"] = result["ROIs"]
 
     return output
