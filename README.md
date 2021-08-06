@@ -1,3 +1,5 @@
+[![ci](https://github.com/rvbCMTS/PySkinDose/actions/workflows/ci.yml/badge.svg)](https://github.com/BwKodex/dicomimagetools/actions/workflows/python-package.yml) [![codecov](https://codecov.io/gh/BwKodex/dicomimagetools/branch/master/graph/badge.svg?token=2O32UO12V6)](https://codecov.io/gh/BwKodex/dicomimagetools)
+
 # Dicom Image Tools 
 The dicom image tools package was created for giving a framework handling DICOM image data. Adding functionality often used for programmatic image analysis.
 
