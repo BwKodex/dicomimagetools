@@ -11,3 +11,4 @@ omit =
     *.egg-info/*
     tests/*
     .idea/*
+    docs/*
