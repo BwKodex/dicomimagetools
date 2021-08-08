@@ -119,6 +119,7 @@ def lcd_statistical_random(
             result["Mean"].append(roi.get_mean(analysis_matrix))
             result["SD"].append(roi.get_stdev(analysis_matrix))
             result["Std Error Mean"].append(roi.get_std_error_of_the_mean(analysis_matrix))
+            result["ROIs"].append(roi)
 
     if random_rois > 0:
         # Determine the mean value and standard deviation in a set of randomly placed ROIs
