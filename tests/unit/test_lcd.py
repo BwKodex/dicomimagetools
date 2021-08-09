@@ -88,11 +88,18 @@ def test_lcd_statistical_random():
 
 
 def test_lcd_statistical_random_returns_rois():
+    expected_rois = 1500
+
     res = lcd_statistical_random(
-        analysis_matrix=TEST_MATRIX, pixel_size=VoxelData(x=1.0, y=1.0), object_size=3.0, return_rois=True
+        analysis_matrix=TEST_MATRIX,
+        pixel_size=VoxelData(x=1.0, y=1.0),
+        object_size=3.0,
+        return_rois=True,
+        rois=expected_rois,
     )
 
     rois = res.get("ROIs")
 
     assert rois is not None
+    assert len(rois) == expected_rois
     assert all([isinstance(roi, SquareRoi) for roi in rois])
