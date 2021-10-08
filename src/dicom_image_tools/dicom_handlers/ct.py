@@ -98,7 +98,7 @@ class CtSeries(DicomSeries):
         super().add_file(file=file, dcm=dcm)
         self.Manufacturer = dcm.Manufacturer
         self.ManufacturersModelName = dcm.ManufacturerModelName
-        self.SlicePosition.append(float(dcm.SliceLocation))
+        self.SlicePosition.append(self._get_slice_position(dcm))
 
         # Reorder lists according to slice positions
         file_order = [ind for ind in list(np.argsort(np.array(self.SlicePosition)))]
@@ -145,9 +145,20 @@ class CtSeries(DicomSeries):
             try:
                 del dcm[0x7FE00010]
             except Exception as e:
+                log.debug(f"Could not remove pixel data from dataset ({fp.absolute()})")
                 pass
 
             self.CompleteMetadata.append(dcm)
+
+    @staticmethod
+    def _get_slice_position(dcm: FileDataset) -> float:
+        if "SliceLocation" in dcm:
+            return float(dcm.SliceLocation)
+
+        if "ImagePositionPatient" in dcm:
+            return float(dcm.ImagePositionPatient[2])
+
+        return float(dcm.ImageNumber)
 
     def get_patient_mask(self, threshold: Optional[int] = -500, remove_table: Optional[bool] = False):
         """Segment the ImageVolume to find the patient/phantom in the images.
