@@ -158,7 +158,7 @@ class CtSeries(DicomSeries):
         if "ImagePositionPatient" in dcm:
             return float(dcm.ImagePositionPatient[2])
 
-        return float(dcm.ImageNumber)
+        return float(dcm.InstanceNumber)
 
     def get_patient_mask(self, threshold: Optional[int] = -500, remove_table: Optional[bool] = False):
         """Segment the ImageVolume to find the patient/phantom in the images.

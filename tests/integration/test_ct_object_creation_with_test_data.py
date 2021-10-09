@@ -40,6 +40,24 @@ def test_ct_series_add_file_sorts_on_image_position_patient_when_slice_location_
     assert actual == expected
 
 
+def test_ct_series_add_file_sorts_on_instance_number_when_slice_location_and_image_position_patient_missing(example_data_path_fixture):
+    # Arrange
+    expected = "1"
+    ct_series = CtSeries(series_instance_uid="1.2.826.0.1.3680043.8.971.31639893030722307093467532646480365648")
+
+    fp_first_slice = example_data_path_fixture["ct"] / "GE" / "MissingSliceLocationAndImagePositionPatientSeries" / "1"
+    fp_last_slice = example_data_path_fixture["ct"] / "GE" / "MissingSliceLocationAndImagePositionPatientSeries" / "2"
+
+    # Act
+    ct_series.add_file(file=fp_last_slice)
+    ct_series.add_file(file=fp_first_slice)
+
+    actual = ct_series.FilePaths[0].name
+
+    # Assert
+    assert actual == expected
+
+
 def test_ct_series_raises_error_on_adding_file_from_other_series(example_data_path_fixture):
     ct_series = CtSeries(series_instance_uid="WrongSeriesInstanceUid")
     with pytest.raises(ValueError):
