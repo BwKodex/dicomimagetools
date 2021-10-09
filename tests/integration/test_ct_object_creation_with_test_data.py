@@ -120,3 +120,10 @@ def test_ct_series_get_patient_mask_remove_table(example_data_path_fixture):
     assert ct_series.MedianHuPatientVolume == 125.0
     assert floor(ct_series.MeanHuPatientVolume) == 85.0
 
+
+def test_ct_series_get_patient_mask_imports_image_volume_if_not_already_imported(example_data_path_fixture):
+    ct_series = CtSeries(series_instance_uid="1.2.826.0.1.3680043.8.971.31305363770056566540494760179678687617")
+    ct_series.add_file(file=example_data_path_fixture["ct"] / "GE" / "serie1" / "1")
+    ct_series.get_patient_mask(threshold=-500, remove_table=False)
+
+    assert ct_series.MaskSuccess is True
