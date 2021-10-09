@@ -135,7 +135,7 @@ class CtSeries(DicomSeries):
             else:
                 self.mA.append(None)
 
-            self.SlicePosition.append(float(dcm.SliceLocation))
+            self.SlicePosition.append(self._get_slice_position(dcm))
 
             self.VoxelData.append(
                 VoxelData(x=float(dcm.PixelSpacing[1]), y=float(dcm.PixelSpacing[0]), z=float(dcm.SliceThickness))

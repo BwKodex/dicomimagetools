@@ -59,6 +59,25 @@ def test_ct_series_import_image_volume(example_data_path_fixture):
     assert ct_series.ImageVolume.shape == (512, 512, 1)
 
 
+def test_ct_series_import_image_volume_appends_ma_from_XRayTubeCurrentInmA_and_XRayTubeCurrentInuA_when_XRayTubeCurrent_tag_is_missing(example_data_path_fixture):
+    # Arrange
+    expected = [520.0, 520.0]
+    ct_series = CtSeries(series_instance_uid="1.2.826.0.1.3680043.8.971.31639893030722307093467532646480365648")
+
+    fp_first_slice = example_data_path_fixture["ct"] / "GE" / "MissingSliceLocationSeries" / "1"
+    fp_last_slice = example_data_path_fixture["ct"] / "GE" / "MissingSliceLocationSeries" / "2"
+
+    # Act
+    ct_series.add_file(file=fp_last_slice)
+    ct_series.add_file(file=fp_first_slice)
+    ct_series.import_image_volume()
+
+    actual = ct_series.mA
+
+    # Assert
+    assert actual == expected
+
+
 def test_ct_series_pixel_data_removed_from_complete_metadata(example_data_path_fixture):
     ct_series = CtSeries(series_instance_uid="1.2.826.0.1.3680043.8.971.31305363770056566540494760179678687617")
     ct_series.add_file(file=example_data_path_fixture["ct"] / "GE" / "serie1" / "1")
@@ -100,3 +119,4 @@ def test_ct_series_get_patient_mask_remove_table(example_data_path_fixture):
     assert ct_series.PatientClipped is False
     assert ct_series.MedianHuPatientVolume == 125.0
     assert floor(ct_series.MeanHuPatientVolume) == 85.0
+
