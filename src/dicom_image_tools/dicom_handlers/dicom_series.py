@@ -1,10 +1,11 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import numpy as np
 import pydicom
 from pydicom import FileDataset
 
+from ..helpers.check_path_is_valid import check_path_is_valid_path
 from ..helpers.voxel_data import VoxelData
 
 
@@ -39,7 +40,7 @@ class DicomSeries:
         self.ImageVolume: Optional[np.ndarray] = None
         self.Mask: Optional[np.ndarray] = None
 
-    def add_file(self, file: Path, dcm: Optional[FileDataset] = None):
+    def add_file(self, file: Union[Path, str], dcm: Optional[FileDataset] = None):
         """Add a file to the objects list of files
 
         First performs a check that the file is a valid DICOM file and that it belongs to the object/series
@@ -50,10 +51,13 @@ class DicomSeries:
 
         Raises:
             ValueError: if SeriesInstanceUID of the file is not the same as the SeriesInstanceUid attribute
+            TypeError: if file is not a valid/existing path
 
         """
+        file = check_path_is_valid_path(path_to_check=file)
+
         if any([True if obj == file else False for obj in self.FilePaths]):
-            # Return None since the file is already in hte volume
+            # Return None since the file is already in the volume
             return
 
         if dcm is None:

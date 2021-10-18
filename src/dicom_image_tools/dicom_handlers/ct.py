@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import numpy as np
 import pydicom
@@ -9,6 +9,7 @@ from scipy import ndimage
 from scipy.ndimage import center_of_mass
 from skimage import morphology
 
+from ..helpers.check_path_is_valid import check_path_is_valid_path
 from ..helpers.patient_centering import PatientGeometricalOffset, PatientMassCenter
 from ..helpers.pixel_data import get_pixel_array
 from ..helpers.voxel_data import VoxelData
@@ -65,7 +66,7 @@ class CtSeries(DicomSeries):
         self.MeanHuPatientVolume: Optional[float] = None
         self.MedianHuPatientVolume: Optional[float] = None
 
-    def add_file(self, file: Path, dcm: Optional[FileDataset] = None) -> None:
+    def add_file(self, file: Union[Path, str], dcm: Optional[FileDataset] = None) -> None:
         """Add a file to the objects list of files.
 
         First performs a check that the file is a valid DICOM file and that it is a CT file.
@@ -75,6 +76,8 @@ class CtSeries(DicomSeries):
             ValueError: If supplied file is not a CT image
 
         """
+        file = check_path_is_valid_path(path_to_check=file)
+
         if dcm is None:
             dcm = pydicom.dcmread(fp=str(file.absolute()), stop_before_pixels=True)
 

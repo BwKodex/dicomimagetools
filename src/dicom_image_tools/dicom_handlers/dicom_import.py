@@ -1,21 +1,22 @@
 import logging
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union
 
 import pydicom
 from pydicom.errors import InvalidDicomError
 
 from .ct import CtSeries
 from .dicom_study import DicomStudy
+from ..helpers.check_path_is_valid import check_path_is_valid_path
 
 logger = logging.getLogger(__name__)
 
 
-def import_dicom_from_folder(folder: Path, recursively: bool = True) -> Dict[str, DicomStudy]:
+def import_dicom_from_folder(folder: Union[Path, str], recursively: bool = True) -> Dict[str, DicomStudy]:
     """Go through a folder and import all valid DICOM images found
 
     Args:
-        folder: Path object of the folder to search for DICOM files
+        folder: Path of the folder to search for DICOM files
         recursively: Specification if the folder should be search recursively. Defaults to True
 
     Raises:
@@ -27,8 +28,8 @@ def import_dicom_from_folder(folder: Path, recursively: bool = True) -> Dict[str
         A dictionary on the form {<study-instance-uid>: <DicomStudy object>}
 
     """
-    if not isinstance(folder, Path):
-        raise TypeError("folder must be a Path object")
+    folder = check_path_is_valid_path(path_to_check=folder)
+
     if not folder.is_dir():
         raise ValueError("The given folder is not a directory")
 
@@ -62,7 +63,7 @@ def import_dicom_from_folder(folder: Path, recursively: bool = True) -> Dict[str
     return dicom_study_list
 
 
-def import_dicom_file(file: Path) -> DicomStudy:
+def import_dicom_file(file: Union[Path, str]) -> DicomStudy:
     """Import a DICOM file into a DicomStudy object
 
     Args:
@@ -77,8 +78,8 @@ def import_dicom_file(file: Path) -> DicomStudy:
         DicomStudy object with the file added to it
 
     """
-    if not isinstance(file, Path):
-        raise TypeError("file must be a Path object")
+    file = check_path_is_valid_path(path_to_check=file)
+
     if not file.is_file():
         raise ValueError("File is not a valid file")
 

@@ -12,6 +12,7 @@ from .ct import CtSeries
 from .dicom_series import DicomSeries
 from .dose_report_class import DoseReport
 from .projection import ProjectionSeries
+from ..helpers.check_path_is_valid import check_path_is_valid_path
 
 
 class DicomStudy:
@@ -41,7 +42,7 @@ class DicomStudy:
         self.ManufacturerModelName: Optional[str] = None
         self.DoseReports: Optional[DoseReport] = DoseReport()
 
-    def add_file(self, file: Path, dcm: Optional[FileDataset] = None) -> None:
+    def add_file(self, file: Union[Path, str], dcm: Optional[FileDataset] = None) -> None:
         """Add the DICOM file to the DicomStudy object after validating the study instance UID
 
         Args:
@@ -50,9 +51,12 @@ class DicomStudy:
 
         Raises:
             InvalidDicomError: If the given file is not a valid DICOM file
+            TypeError: If the file is not a valid path
             ValueError: If the file does not have the same study instance UID as the StudyInstanceUID of the object
 
         """
+        file = check_path_is_valid_path(path_to_check=file)
+
         if dcm is None:
             dcm = pydicom.dcmread(fp=str(file.absolute()), stop_before_pixels=True)
 

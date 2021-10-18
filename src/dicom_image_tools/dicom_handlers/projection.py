@@ -1,12 +1,13 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 import numpy as np
 import pydicom
 from pydicom import FileDataset
 
+from ..helpers.check_path_is_valid import check_path_is_valid_path
 from ..helpers.pixel_data import get_pixel_array
 from ..helpers.voxel_data import VoxelData
 from .dicom_series import DicomSeries
@@ -59,7 +60,7 @@ class ProjectionSeries(DicomSeries):
 
         self.add_file(file=file, dcm=dcm)
 
-    def add_file(self, file: Path, dcm: Optional[FileDataset] = None):
+    def add_file(self, file: Union[Path, str], dcm: Optional[FileDataset] = None):
         """Add a file to the objects list of files
 
         First performs a check that the file path is of a path object and that it has the same series instance UID as
@@ -74,8 +75,7 @@ class ProjectionSeries(DicomSeries):
             ValueError: If the file does not have the same study instance UID as the StudyInstanceUID of the object
 
         """
-        if not isinstance(file, Path):
-            raise TypeError("file is not a Path-object")
+        file = check_path_is_valid_path(path_to_check=file)
 
         super().add_file(file=file, dcm=dcm)
 
@@ -112,7 +112,7 @@ class ProjectionSeries(DicomSeries):
             try:
                 del dcm[0x7FE00010]
             except Exception:
-                logger.warning(
+                logger.debug(
                     "Failed to remove pixel data from file before appending to CompleteMetadata", exc_info=True
                 )
                 pass

@@ -21,6 +21,6 @@ setup(
     ],
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    install_requires=["pydicom>=2.1.1", "numpy>=1.20.0", "scikit-image>=0.17.2", "scipy>=1.5.4"],
+    install_requires=["pydicom>=2.1.1", "numpy>=1.20.0", "scikit-image>=0.17.2", "scipy>=1.5.4", "SimpleITK>=2.1.1"],
     zip_safe=False,
 )
