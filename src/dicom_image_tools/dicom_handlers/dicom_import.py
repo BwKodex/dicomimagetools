@@ -7,6 +7,7 @@ from pydicom.errors import InvalidDicomError
 
 from .ct import CtSeries
 from .dicom_study import DicomStudy
+from .dose_matrix import DoseMatrix
 from ..helpers.check_path_is_valid import check_path_is_valid_path
 
 logger = logging.getLogger(__name__)
@@ -93,6 +94,8 @@ def import_dicom_file(file: Union[Path, str]) -> DicomStudy:
 
     if isinstance(output.Series[0], CtSeries):
         output.Series[0].import_image_volume()
+    elif isinstance(output.Series[0], DoseMatrix):
+        output.Series[0].import_dose_matrix()
     else:
         output.Series[0].import_image()
 

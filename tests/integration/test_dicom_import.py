@@ -9,6 +9,7 @@ from dicom_image_tools.dicom_handlers.dicom_import import (
     import_dicom_from_folder,
 )
 from dicom_image_tools.dicom_handlers.dicom_study import DicomStudy
+from dicom_image_tools.dicom_handlers.dose_matrix import DoseMatrix
 
 
 def test_import_dicom_from_file_should_parse_kv_ma_ms_tags():
@@ -123,3 +124,26 @@ def test_import_dicom_file_raises_invalid_dicom_error():
 
     with pytest.raises(InvalidDicomError):
         import_dicom_file(file=file)
+
+
+def test_import_file_should_create_dose_matrix_series():
+    # Arrange
+    file = Path(__file__).parent.parent / "test_data" / "dose_matrix" / "dose_matrix_1.dcm"
+
+    # Act
+    actual = import_dicom_file(file=file)
+
+    # Assert
+    assert isinstance(actual.Series[0], DoseMatrix)
+
+
+def test_import_dicom_from_folder_correctly_imports_dose_matrix_files():
+    # Arrange
+    folder = Path(__file__).parent.parent / "test_data" / "dose_matrix"
+
+    # Act
+    dicom_study = import_dicom_from_folder(folder=folder)
+    actual = dicom_study[list(dicom_study.keys())[0]].Series[0]
+
+    # Assert
+    assert isinstance(actual, DoseMatrix)

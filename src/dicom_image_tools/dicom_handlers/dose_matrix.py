@@ -33,6 +33,8 @@ class DoseMatrix(DicomSeries):
         self.ImageVolume: Optional[List[np.ndarray]] = []
         self.Origin: Optional[List[List[float]]] = []
 
+        self.add_file(file=file, dcm=dcm)
+
     def add_file(self, file: Union[Path, str], dcm: Optional[FileDataset] = None):
         """Add a file to the objects list of files
 
@@ -65,9 +67,15 @@ class DoseMatrix(DicomSeries):
         self.DoseType.append(dcm.DoseType if "DoseType" in dcm else None)
         self.DoseUnit.append(dcm.DoseUnit if "DoseUnit" in dcm else None)
         self.Origin.append([float(pos) for pos in dcm.ImagePositionPatient] if "ImagePositionPatient" in dcm else None)
-        self.VoxelData.append(
-            VoxelData(x=float(dcm.PixelData[1]), y=float(dcm.PixelData[0]), z=float(dcm.SliceThickness))
-        )
+
+        if "PixelSpacing" in dcm:
+            try:
+                self.VoxelData.append(
+                    VoxelData(x=float(dcm.PixelSpacing[1]), y=float(dcm.PixelSpacing[0]), z=float(dcm.SliceThickness))
+                )
+            except:
+                logger.error("Failed to set VoxelData for dose matrix", exc_info=True)
+                self.VoxelData.append(None)
 
         # Remove pixel data part of dcm to decrease memory used for the object
         if "PixelData" in dcm:

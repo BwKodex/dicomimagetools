@@ -4,6 +4,7 @@ from typing import List, Optional, Union
 import pydicom
 from pydicom import FileDataset
 
+from .dose_matrix import DoseMatrix
 from ..constants.SopClassUids import (
     RADIATION_DOSE_STRUCTURED_REPORT_SOP_CLASS_UIDS,
     SECONDARY_CAPTURE_SOP_CLASS_UIDS,
@@ -75,6 +76,8 @@ class DicomStudy:
         except ValueError:
             if dcm.Modality == "CT":
                 self.Series.append(CtSeries(series_instance_uid=dcm.SeriesInstanceUID))
+            elif dcm.Modality == "RTDOSE":
+                self.Series.append(DoseMatrix(file=file, dcm=dcm))
             else:
                 self.Series.append(ProjectionSeries(file=file, dcm=dcm))
             index = [obj.SeriesInstanceUid for obj in self.Series].index(dcm.SeriesInstanceUID)
