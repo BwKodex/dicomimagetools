@@ -18,11 +18,35 @@ def get_pixel_array(dcm: Dataset) -> np.ndarray:
 
     """
     px = dcm.pixel_array.astype(np.int16)
+
+    if "Modality" in dcm and dcm.Modality.casefold() == "RTDOSE".casefold():
+        return rescale_dose_matrix_pixel_array(pixel_array=px, dcm=dcm)
+
     if "RescaleSlope" in dcm:
         log.debug("Rescaling slope of pixel array")
         px *= np.int16(dcm.RescaleSlope)
+
     if "RescaleIntercept" in dcm:
         log.debug("Rescaling intercept of pixel array")
         px += np.int16(dcm.RescaleIntercept)
 
     return px
+
+
+def rescale_dose_matrix_pixel_array(pixel_array: np.ndarray, dcm: Dataset) -> np.ndarray:
+    """ Rescaled the dose matrix by the DoseGridScaling tag value if it is present in the dataset
+
+    Args:
+        pixel_array: The dose matrix as a numpy.ndarray
+        dcm: The dataset containing information on the dose matrix
+
+    Returns:
+        The rescaled dose matrix as a numpy.ndarray of int16 numbers
+
+    """
+    if "DoseGridScaling" in dcm:
+        scaling_factor = dcm.DoseGridScaling
+        log.debug(f"Rescaling dose matrix by DoseGridScaling of {scaling_factor}")
+        pixel_array *= np.int16(scaling_factor)
+
+    return pixel_array
