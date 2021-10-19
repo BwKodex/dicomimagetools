@@ -17,18 +17,18 @@ def get_pixel_array(dcm: Dataset) -> np.ndarray:
         Extracted image as a numpy ndarray of int16 numbers
 
     """
-    px = dcm.pixel_array.astype(np.int16)
+    px = dcm.pixel_array.astype(np.float)
 
     if "Modality" in dcm and dcm.Modality.casefold() == "RTDOSE".casefold():
         return rescale_dose_matrix_pixel_array(pixel_array=px, dcm=dcm)
 
     if "RescaleSlope" in dcm:
         log.debug("Rescaling slope of pixel array")
-        px *= np.int16(dcm.RescaleSlope)
+        px *= np.float(dcm.RescaleSlope)
 
     if "RescaleIntercept" in dcm:
         log.debug("Rescaling intercept of pixel array")
-        px += np.int16(dcm.RescaleIntercept)
+        px += np.float(dcm.RescaleIntercept)
 
     return px
 
