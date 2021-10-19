@@ -20,7 +20,7 @@ class DoseMatrix(DicomSeries):
     """
     def __init__(self, file: Path, dcm: Optional[FileDataset] = None):
         if dcm is None:
-            dcm = pydicom.dcmread(fp=str(file.absolute()), stop_before_pixels=True)
+            dcm = pydicom.dcmread(fp=file, stop_before_pixels=True)
 
         if "SeriesInstanceUID" not in dcm:
             raise ValueError("The DICOM file does not contain a series instance UID")

@@ -37,7 +37,7 @@ def dose_matrix() -> np.ndarray:
 
 
 @fixture(scope="function")
-def dose_matrix_file(dose_matrix):
+def dose_matrix_tempfile(dose_matrix):
     suffix = '.dcm'
     filename_little_endian = tempfile.NamedTemporaryFile(suffix=suffix).name
 
@@ -65,6 +65,9 @@ def dose_matrix_file(dose_matrix):
     ds.PixelData = dose_matrix.tobytes()
     ds.save_as(filename_little_endian)
 
-    ds = pydicom.dcmread(filename_little_endian)
+    return filename_little_endian
 
-    return ds
+
+@fixture(scope="function")
+def dose_matrix_file(dose_matrix_tempfile):
+    return pydicom.dcmread(dose_matrix_tempfile)
