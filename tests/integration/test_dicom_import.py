@@ -29,7 +29,7 @@ def test_import_dicom_from_file_should_parse_kv_ma_ms_tags():
 
 
 def test_import_dicom_from_folder_should_find_all_files_in_given_folder():
-    expected = 7
+    expected = 8
 
     folder = Path(__file__).parent.parent / "test_data"
 
@@ -73,9 +73,9 @@ def test_import_dicom_from_folder_imports_dose_reports_and_series():
 def test_import_dicom_from_folder_raises_type_error():
     with pytest.raises(TypeError) as excinfo:
         # noinspection PyTypeChecker
-        import_dicom_from_folder(folder="InvalidFolderType")
+        import_dicom_from_folder(folder=123)
 
-    assert "folder must be a Path object" in str(excinfo.value)
+    assert "Invalid path" in str(excinfo.value)
 
 
 def test_import_dicom_from_folder_raises_value_error_if_not_directory():
@@ -105,9 +105,9 @@ def test_import_dicom_file():
 def test_import_dicom_file_raises_type_error():
     with pytest.raises(TypeError) as excinfo:
         # noinspection PyTypeChecker
-        import_dicom_file(file="InvalidFileType")
+        import_dicom_file(file=1234)
 
-    assert "file must be a Path object" in str(excinfo.value)
+    assert "Invalid path" in str(excinfo.value)
 
 
 def test_import_dicom_file_raises_value_error_if_not_file():

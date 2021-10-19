@@ -3,7 +3,7 @@ import pytest
 from dicom_image_tools.helpers.geometry import Line
 
 
-@pytest.mark.parameterize(
+@pytest.mark.parametrize(
     "x0,y0,x1,y1",
     [
         ("0", 1, 1, 1),

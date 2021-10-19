@@ -67,6 +67,7 @@ class DoseMatrix(DicomSeries):
         self.DoseType.append(dcm.DoseType if "DoseType" in dcm else None)
         self.DoseUnit.append(dcm.DoseUnit if "DoseUnit" in dcm else None)
         self.Origin.append([float(pos) for pos in dcm.ImagePositionPatient] if "ImagePositionPatient" in dcm else None)
+        self.FilePaths.append(file)
 
         if "PixelSpacing" in dcm:
             try:
