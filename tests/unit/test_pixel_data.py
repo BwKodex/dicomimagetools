@@ -8,7 +8,7 @@ from dicom_image_tools.helpers.pixel_data import rescale_dose_matrix_pixel_array
 
 def test_rescale_dose_matrix_pixel_array_rescales_the_pixel_array_by_the_dose_grid_scaling_factor(dose_matrix):
     # Arrange
-    scaling_factor = 10
+    scaling_factor = 10.0
     expected = max(dose_matrix.flatten()) * scaling_factor
     ds: Dataset = Dataset()
     ds.DoseGridScaling = scaling_factor
@@ -39,7 +39,7 @@ def test_rescale_dose_matrix_pixel_array_returns_same_object_if_dose_grid_scalin
 
 def test_get_pixel_array_rescales_by_DoseGridScaling_when_rtdose_modality(dose_matrix, dose_matrix_file):
     # Arrange
-    scaling_factor = 10
+    scaling_factor = 0.12
     expected = max(dose_matrix.flatten()) * scaling_factor
 
     ds = dose_matrix_file.copy()
