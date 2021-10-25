@@ -47,6 +47,6 @@ def rescale_dose_matrix_pixel_array(pixel_array: np.ndarray, dcm: Dataset) -> np
     if "DoseGridScaling" in dcm:
         scaling_factor = dcm.DoseGridScaling
         log.debug(f"Rescaling dose matrix by DoseGridScaling of {scaling_factor}")
-        pixel_array *= np.int16(scaling_factor)
+        pixel_array = pixel_array.astype(np.float) * np.float(scaling_factor)
 
     return pixel_array
