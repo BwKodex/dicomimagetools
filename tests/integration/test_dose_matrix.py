@@ -4,7 +4,7 @@ import pydicom
 import pytest
 
 from dicom_image_tools.dicom_handlers.dose_matrix import DoseMatrix
-from dicom_image_tools.helpers.geometry import get_shortest_line_point_dist, Line
+from dicom_image_tools.helpers.geometry import Line, get_shortest_line_point_dist
 from dicom_image_tools.helpers.point import Point
 
 

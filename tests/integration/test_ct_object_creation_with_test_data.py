@@ -40,7 +40,9 @@ def test_ct_series_add_file_sorts_on_image_position_patient_when_slice_location_
     assert actual == expected
 
 
-def test_ct_series_add_file_sorts_on_instance_number_when_slice_location_and_image_position_patient_missing(example_data_path_fixture):
+def test_ct_series_add_file_sorts_on_instance_number_when_slice_location_and_image_position_patient_missing(
+    example_data_path_fixture,
+):
     # Arrange
     expected = "1"
     ct_series = CtSeries(series_instance_uid="1.2.826.0.1.3680043.8.971.31639893030722307093467532646480365648")
@@ -77,7 +79,9 @@ def test_ct_series_import_image_volume(example_data_path_fixture):
     assert ct_series.ImageVolume.shape == (512, 512, 1)
 
 
-def test_ct_series_import_image_volume_appends_ma_from_XRayTubeCurrentInmA_and_XRayTubeCurrentInuA_when_XRayTubeCurrent_tag_is_missing(example_data_path_fixture):
+def test_ct_series_import_image_volume_appends_ma_from_XRayTubeCurrentInmA_and_XRayTubeCurrentInuA_when_XRayTubeCurrent_tag_is_missing(
+    example_data_path_fixture,
+):
     # Arrange
     expected = [520.0, 520.0]
     ct_series = CtSeries(series_instance_uid="1.2.826.0.1.3680043.8.971.31639893030722307093467532646480365648")

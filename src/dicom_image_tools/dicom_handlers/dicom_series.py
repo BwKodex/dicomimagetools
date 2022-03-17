@@ -3,10 +3,15 @@ from typing import List, Optional, Union
 
 import numpy as np
 import pydicom
+from plotly import graph_objects as go
 from pydicom import FileDataset
+
+from dicom_image_tools.plotting.colour_scales import plotly_colour_scales
 
 from ..helpers.check_path_is_valid import check_path_is_valid_path
 from ..helpers.voxel_data import VoxelData
+from ..plotting.plotly import show_image
+from ..roi.roi import Roi
 
 
 class DicomSeries:
@@ -101,3 +106,38 @@ class DicomSeries:
         image = np.multiply(image - np.power(2, metadata.BitsStored), -1)
 
         return image
+
+    def show_image(
+        self,
+        index: int = 0,
+        rois: Optional[list[Roi]] = None,
+        colour_map: str = "bone",
+        window: Optional[tuple[float, float]] = None,
+    ) -> go.Figure:
+        if not isinstance(index, int):
+            raise TypeError("Image index must be given as an integer")
+
+        if index < 0 or index > (len(self.FilePaths) - 1):
+            raise ValueError("Invalid image index specified")
+
+        if rois is not None and (not isinstance(rois, list) or not all([isinstance(roi, list) for roi in rois])):
+            raise TypeError("Only list of SquareRoi instances are implemented for plotting")
+
+        ALLOWED_COLOUR_MAPS = list(plotly_colour_scales.keys())
+
+        if not isinstance(colour_map, str):
+            raise TypeError(
+                f"The colour map must be given as the name of an implemented colour map. Allowed values are {', '.join(ALLOWED_COLOUR_MAPS)}"
+            )
+
+        if colour_map not in ALLOWED_COLOUR_MAPS:
+            raise NotImplementedError(
+                f"Colour map must be one of the following implemented colour maps: {', '.join(ALLOWED_COLOUR_MAPS)}"
+            )
+
+        if window is not None:
+            if not isinstance(window, (tuple, list)):
+                raise TypeError("If specified, the window must be a tuple of length 2")
+
+            if len(window) != 2 or any([not isinstance(val, (float, int)) for val in window]):
+                raise ValueError("The specified window must be a tuple of exactly 2 floats")
