@@ -4,16 +4,16 @@ from typing import List, Optional, Union
 import pydicom
 from pydicom import FileDataset
 
-from .dose_matrix import DoseMatrix
 from ..constants.SopClassUids import (
     RADIATION_DOSE_STRUCTURED_REPORT_SOP_CLASS_UIDS,
     SECONDARY_CAPTURE_SOP_CLASS_UIDS,
 )
+from ..helpers.check_path_is_valid import check_path_is_valid_path
 from .ct import CtSeries
 from .dicom_series import DicomSeries
+from .dose_matrix import DoseMatrix
 from .dose_report_class import DoseReport
 from .projection import ProjectionSeries
-from ..helpers.check_path_is_valid import check_path_is_valid_path
 
 
 class DicomStudy:

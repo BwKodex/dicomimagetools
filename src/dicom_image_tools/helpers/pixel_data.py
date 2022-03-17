@@ -34,7 +34,7 @@ def get_pixel_array(dcm: Dataset) -> np.ndarray:
 
 
 def rescale_dose_matrix_pixel_array(pixel_array: np.ndarray, dcm: Dataset) -> np.ndarray:
-    """ Rescaled the dose matrix by the DoseGridScaling tag value if it is present in the dataset
+    """Rescaled the dose matrix by the DoseGridScaling tag value if it is present in the dataset
 
     Args:
         pixel_array: The dose matrix as a numpy.ndarray

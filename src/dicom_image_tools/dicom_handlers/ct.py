@@ -4,6 +4,7 @@ from typing import List, Optional, Union
 
 import numpy as np
 import pydicom
+from plotly import graph_objects as go
 from pydicom import FileDataset
 from scipy import ndimage
 from scipy.ndimage import center_of_mass
@@ -13,6 +14,13 @@ from ..helpers.check_path_is_valid import check_path_is_valid_path
 from ..helpers.patient_centering import PatientGeometricalOffset, PatientMassCenter
 from ..helpers.pixel_data import get_pixel_array
 from ..helpers.voxel_data import VoxelData
+from ..helpers.window import get_default_window_settings
+from ..plotting.plotly import (
+    create_stack_plot,
+    get_image_and_roi_traces_and_layout,
+    show_image,
+)
+from ..roi.roi import Roi
 from .dicom_series import DicomSeries
 
 log = logging.getLogger(__name__)
@@ -345,3 +353,74 @@ class CtSeries(DicomSeries):
                     x=diff_table_x_mm - diff_geom_x_center_mm, y=diff_table_y_mm - diff_geom_y_center_mm
                 )
             )
+
+    def show_image(
+        self,
+        index: int = 0,
+        rois: Optional[Roi] = None,
+        colour_map: str = "bone",
+        window: Optional[tuple[float, float]] = None,
+        roi_only_borders: Optional[bool] = True,
+        roi_colour: str = "#33a652",
+        roi_border_width: int = 2,
+    ) -> go.Figure:
+        super().show_image(index=index, rois=rois, colour_map=colour_map, window=window)
+
+        if self.ImageVolume is None:
+            self.import_image_volume()
+
+        if window is None:
+            window = (-500, 500)
+
+        return show_image(
+            image=self.ImageVolume[:, :, index],
+            x_scale=self.VoxelData[index].x,
+            y_scale=self.VoxelData[index].y,
+            window=window,
+            rois=rois,
+            roi_colour=roi_colour,
+            roi_only_border=roi_only_borders,
+            roi_border_width=roi_border_width,
+            colour_map=colour_map,
+        )
+
+    def show_image_slices(
+        self,
+        rois: Optional[list[list[Roi]]] = None,
+        colour_map: str = "bone",
+        window: Optional[tuple[float, float]] = None,
+        roi_only_borders: Optional[bool] = True,
+        roi_colour: str = "#33a652",
+        roi_border_width: int = 2,
+        colour_bar: Optional[bool] = True,
+    ):
+        super().show_image(index=0, rois=None, colour_map=colour_map, window=window)
+
+        if rois is None:
+            rois = [None] * len(self.FilePaths)
+
+        if not isinstance(rois, list) or not all(
+            [
+                roi is None or (isinstance(roi, list) and all([isinstance(roi_instance, Roi) for roi_instance in roi]))
+                for roi in rois
+            ]
+        ):
+            raise TypeError("ROIs, if specified, must be given as a list of lists of SquareRoi instances")
+
+        if self.ImageVolume is None:
+            self.import_image_volume()
+
+        if window is None:
+            window = self._get_default_window_settings(index=0)
+
+        return create_stack_plot(
+            image=self.ImageVolume,
+            x_scale=[voxel_data.x for voxel_data in self.VoxelData],
+            y_scale=[voxel_data.y for voxel_data in self.VoxelData],
+            window=window,
+        )
+
+    def _get_default_window_settings(self, index: int) -> tuple[float, float]:
+        return get_default_window_settings(
+            metadata=self.CompleteMetadata[index], image_slice=self.ImageVolume[:, :, index], modality="ct"
+        )

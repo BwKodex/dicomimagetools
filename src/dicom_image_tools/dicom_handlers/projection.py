@@ -5,11 +5,16 @@ from typing import Any, List, Optional, Union
 
 import numpy as np
 import pydicom
+from plotly import graph_objects as go
 from pydicom import FileDataset
 
 from ..helpers.check_path_is_valid import check_path_is_valid_path
 from ..helpers.pixel_data import get_pixel_array
+from ..helpers.rotate_image import rotate_image
 from ..helpers.voxel_data import VoxelData
+from ..helpers.window import get_default_window_settings
+from ..plotting.plotly import show_image
+from ..roi.roi import Roi
 from .dicom_series import DicomSeries
 
 logger = logging.getLogger(__name__)
@@ -128,26 +133,23 @@ class ProjectionSeries(DicomSeries):
 
         return float(tag_value)
 
-    def import_image(self) -> None:
-        """Import the pixel data into the ImageVolume property
-
-        Returns:
-
-        """
+    def import_image(self, rotate_to_0_degerees: Optional[bool] = False) -> None:
+        """Import the pixel data into the ImageVolume property"""
         self.ImageVolume = []
-        for fp in self.FilePaths:
+        for ind, fp in enumerate(self.FilePaths):
             dcm = pydicom.dcmread(str(fp.absolute()))
-            self.ImageVolume.append(get_pixel_array(dcm=dcm))
+            pixel_array = get_pixel_array(dcm=dcm)
+
+            if rotate_to_0_degerees:
+                pixel_array = rotate_image(image=pixel_array, metadata=self.CompleteMetadata[ind])
+
+            self.ImageVolume.append(pixel_array)
 
         if self.PixelIntensityNormalized:
             self.normalize_pixel_intensity_relationship()
 
     def sort_images_on_acquisition_time(self) -> None:
-        """Reorder the images in the series based on the acquisition time
-
-        Returns:
-
-        """
+        """Reorder the images in the series based on the acquisition time"""
         file_order = [
             ind for ind in list(np.argsort(np.array([self._get_acquisition_time(ds) for ds in self.CompleteMetadata])))
         ]
@@ -179,3 +181,36 @@ class ProjectionSeries(DicomSeries):
         if len(list_to_order) == 0:
             return list_to_order
         return [list_to_order[ind] for ind in order_list]
+
+    def show_image(
+        self,
+        index: int = 0,
+        rois: Optional[Roi] = None,
+        colour_map: str = "bone",
+        window: Optional[tuple[float, float]] = None,
+        roi_only_borders: Optional[bool] = True,
+        roi_colour: str = "#33a652",
+        roi_border_width: int = 2,
+    ) -> go.Figure:
+        super().show_image(index=index, rois=rois, colour_map=colour_map, window=window)
+
+        if self.ImageVolume is None:
+            self.import_image()
+
+        if window is None:
+            window = self._get_default_window_settings(index=index)
+
+        return show_image(
+            image=self.ImageVolume[index],
+            x_scale=self.VoxelData[index].x,
+            y_scale=self.VoxelData[index].y,
+            window=window,
+            rois=rois,
+            roi_colour=roi_colour,
+            roi_only_border=roi_only_borders,
+            roi_border_width=roi_border_width,
+            colour_map=colour_map,
+        )
+
+    def _get_default_window_settings(self, index: int) -> tuple[float, float]:
+        return get_default_window_settings(metadata=self.CompleteMetadata[index], image_slice=self.ImageVolume[index])

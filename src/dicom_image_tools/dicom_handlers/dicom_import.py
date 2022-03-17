@@ -5,10 +5,10 @@ from typing import Dict, Union
 import pydicom
 from pydicom.errors import InvalidDicomError
 
+from ..helpers.check_path_is_valid import check_path_is_valid_path
 from .ct import CtSeries
 from .dicom_study import DicomStudy
 from .dose_matrix import DoseMatrix
-from ..helpers.check_path_is_valid import check_path_is_valid_path
 
 logger = logging.getLogger(__name__)
 

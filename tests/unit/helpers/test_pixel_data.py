@@ -3,7 +3,10 @@ import tempfile
 import numpy as np
 from pydicom import Dataset
 
-from dicom_image_tools.helpers.pixel_data import rescale_dose_matrix_pixel_array, get_pixel_array
+from dicom_image_tools.helpers.pixel_data import (
+    get_pixel_array,
+    rescale_dose_matrix_pixel_array,
+)
 
 
 def test_rescale_dose_matrix_pixel_array_rescales_the_pixel_array_by_the_dose_grid_scaling_factor(dose_matrix):
@@ -14,10 +17,7 @@ def test_rescale_dose_matrix_pixel_array_rescales_the_pixel_array_by_the_dose_gr
     ds.DoseGridScaling = scaling_factor
 
     # Act
-    actual = max(rescale_dose_matrix_pixel_array(
-        pixel_array=dose_matrix,
-        dcm=ds
-    ).flatten())
+    actual = max(rescale_dose_matrix_pixel_array(pixel_array=dose_matrix, dcm=ds).flatten())
 
     # Assert
     assert actual == expected
@@ -28,10 +28,7 @@ def test_rescale_dose_matrix_pixel_array_returns_same_object_if_dose_grid_scalin
     expected = dose_matrix.copy()
 
     # Act
-    actual = rescale_dose_matrix_pixel_array(
-        pixel_array=expected,
-        dcm=Dataset()
-    )
+    actual = rescale_dose_matrix_pixel_array(pixel_array=expected, dcm=Dataset())
 
     # Assert
     assert np.testing.assert_array_equal(actual, expected) is None

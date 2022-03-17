@@ -1,23 +1,25 @@
 import logging
 from pathlib import Path
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 import pydicom
+from plotly import graph_objects as go
 from pydicom import FileDataset
 
-from .dicom_series import DicomSeries
 from ..helpers.check_path_is_valid import check_path_is_valid_path
 from ..helpers.pixel_data import get_pixel_array
 from ..helpers.voxel_data import VoxelData
+from ..plotting.plotly import show_image
+from ..roi.roi import Roi
+from .dicom_series import DicomSeries
 
 logger = logging.getLogger(__name__)
 
 
 class DoseMatrix(DicomSeries):
-    """A class to manage dose matrix series from Treatment planning systems.
+    """A class to manage dose matrix series from Treatment planning systems."""
 
-    """
     def __init__(self, file: Path, dcm: Optional[FileDataset] = None):
         if dcm is None:
             dcm = pydicom.dcmread(fp=file, stop_before_pixels=True)
@@ -107,3 +109,33 @@ class DoseMatrix(DicomSeries):
         See :func:`~dicom_image_tools.dicom_handlers.dose_matrix.DoseMatrix.import_image_volume`
         """
         self.import_image_volume()
+
+    def show_image(
+        self,
+        index: int = 0,
+        rois: Optional[Roi] = None,
+        colour_map: str = "pet",
+        window: Optional[tuple[float, float]] = None,
+        roi_only_borders: Optional[bool] = True,
+        roi_colour: str = "#33a652",
+        roi_border_width: int = 2,
+    ) -> go.Figure:
+        super().show_image(index=index, rois=rois, colour_map=colour_map, window=window)
+
+        if self.ImageVolume is None:
+            self.import_dose_matrix()
+
+        if window is None:
+            window = (float(np.min(self.ImageVolume[:, :, index])), float(np.max(self.ImageVolume[:, :, index])))
+
+        return show_image(
+            image=self.ImageVolume[:, :, index],
+            x_scale=self.VoxelData[index].x,
+            y_scale=self.VoxelData[index].y,
+            window=window,
+            rois=rois,
+            roi_colour=roi_colour,
+            roi_only_border=roi_only_borders,
+            roi_border_width=roi_border_width,
+            colour_map=colour_map,
+        )
