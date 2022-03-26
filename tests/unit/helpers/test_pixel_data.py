@@ -41,6 +41,7 @@ def test_get_pixel_array_rescales_by_DoseGridScaling_when_rtdose_modality(dose_m
 
     ds = dose_matrix_file.copy()
     ds.DoseGridScaling = scaling_factor
+    ds.BitsStored = 12
 
     # Act
     actual = max(get_pixel_array(dcm=ds).flatten())

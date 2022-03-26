@@ -104,8 +104,8 @@ def lcd_statistical_random(
     random_rois = int(np.floor(rois - structured_rois[0] * structured_rois[1]))
 
     # Determine the mean values and standard deviation for a structured ROI set
-    for col in range(np.int(structured_rois[0])):
-        for row in range(np.int(structured_rois[1])):
+    for col in range(int(structured_rois[0])):
+        for row in range(int(structured_rois[1])):
             roi = SquareRoi(
                 center=Point(
                     x=int(col * roi_size[0] + np.ceil(roi_size[0] / 2)),

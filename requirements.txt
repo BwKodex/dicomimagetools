@@ -2,3 +2,7 @@ pytest
 black
 isort
 coverage
+sphinx
+livereload
+myst-parser
+sphinx-rtd-theme

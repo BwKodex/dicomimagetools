@@ -9,10 +9,12 @@ from plotly import graph_objects as go
 from pydicom import FileDataset
 
 from ..helpers.check_path_is_valid import check_path_is_valid_path
+from ..helpers.normalize_dicom_exposure_parameters import get_xray_tube_current_in_ma
 from ..helpers.pixel_data import get_pixel_array
 from ..helpers.rotate_image import rotate_image
 from ..helpers.voxel_data import VoxelData
 from ..helpers.window import get_default_window_settings
+from ..image_quality.variance_image import get_variance_image_2d
 from ..plotting.plotly import show_image
 from ..roi.roi import Roi
 from .dicom_series import DicomSeries
@@ -100,15 +102,7 @@ class ProjectionSeries(DicomSeries):
             )
 
         self.kV.append(self._get_tag_value_as_float_or_none("KVP", ds=dcm))
-
-        if "XRayTubeCurrent" in dcm:
-            self.mA.append(float(dcm.XRayTubeCurrent))
-        elif "XRayTubeCurrentInmA" in dcm:
-            self.mA.append(float(dcm.XRayTubeCurrentInmA))
-        elif "XRayTubeCurrentInuA" in dcm:
-            self.mA.append(float(dcm.XRayTubeCurrentInuA) / 1000)
-        else:
-            self.mA.append(None)
+        self.mA.append(get_xray_tube_current_in_ma(dcm))
 
         self.ms.append(self._get_tag_value_as_float_or_none("ExposureTime", ds=dcm))
 
@@ -162,6 +156,30 @@ class ProjectionSeries(DicomSeries):
         )
         self.FilePaths = self._reorder_list_by_index_order_list(order_list=file_order, list_to_order=self.FilePaths)
         self.ImageVolume = self._reorder_list_by_index_order_list(order_list=file_order, list_to_order=self.ImageVolume)
+
+    def get_variance_images_for_image_volume(self, window_side_x: int = 3, window_side_y: int = 3) -> list[np.ndarray]:
+        """Calculate the variance image for each image in the image volume
+
+        Args:
+            window_side_x: The horizontal side (columns) of the rolling window applied. Default = 3
+            window_side_y: The vertical side (rows) of the rolling window applied. Default = 3
+
+        Returns:
+            A list of variance images in the same order as the images in the ImageVolume
+
+        Raises:
+            ValueError: If the image volume is not imported
+        """
+        if not self.ImageVolume:
+            raise ValueError(
+                f"The image{'s' if len(self.FilePaths) > 1 else ''} must be imported before the variance images can be "
+                f"calculated"
+            )
+
+        return [
+            get_variance_image_2d(image=image, window_side_x=window_side_x, window_side_y=window_side_y)
+            for image in self.ImageVolume
+        ]
 
     @staticmethod
     def _get_acquisition_time(dataset: FileDataset) -> Optional[datetime]:

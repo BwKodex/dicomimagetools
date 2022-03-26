@@ -9,11 +9,16 @@ def remove_position_indication_square_schick_sensor_image(image: np.ndarray, met
     image in a negative way.
 
     Args:
-        image:
-        metadata:
+        image: The Schick sensor image to remove position indication square from
+        metadata: The metadata of the image
 
     Returns:
+        The same image but with the position indication square pixel values rescaled to the same scale as the rest of
+        the image
 
+    Raises:
+        NotImplementedError: If the metadata does not contain the DetectorManufacturerName tag
+        NotImplementedError: If the metadata does not specify Sirona Dental, Inc. as the detector manufacturer
     """
     if "DetectorManufacturerName" not in metadata:
         raise NotImplementedError("No information on the detector manufacturer in file")

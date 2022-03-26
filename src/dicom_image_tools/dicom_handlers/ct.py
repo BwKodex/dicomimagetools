@@ -11,6 +11,7 @@ from scipy.ndimage import center_of_mass
 from skimage import morphology
 
 from ..helpers.check_path_is_valid import check_path_is_valid_path
+from ..helpers.normalize_dicom_exposure_parameters import get_xray_tube_current_in_ma
 from ..helpers.patient_centering import PatientGeometricalOffset, PatientMassCenter
 from ..helpers.pixel_data import get_pixel_array
 from ..helpers.voxel_data import VoxelData
@@ -136,15 +137,7 @@ class CtSeries(DicomSeries):
 
             self.ImageVolume[:, :, ind] = px
             self.kV.append(float(dcm.KVP))
-
-            if "XRayTubeCurrent" in dcm:
-                self.mA.append(float(dcm.XRayTubeCurrent))
-            elif "XRayTubeCurrentInmA" in dcm:
-                self.mA.append(float(dcm.XRayTubeCurrentInmA))
-            elif "XRayTubeCurrentInuA" in dcm:
-                self.mA.append(float(dcm.XRayTubeCurrentInuA) / 1000)
-            else:
-                self.mA.append(None)
+            self.mA.append(get_xray_tube_current_in_ma(dcm))
 
             self.SlicePosition.append(self._get_slice_position(dcm))
 
@@ -197,11 +190,11 @@ class CtSeries(DicomSeries):
         if remove_table:
             # Remove the table by eroding and dilating the image volume
             if self.Mask.shape[2] > 2:
-                self.Mask = morphology.binary_erosion(image=self.Mask, selem=morphology.cube(width=3))
+                self.Mask = morphology.binary_erosion(image=self.Mask, footprint=morphology.cube(width=3))
             else:
                 for i in range(self.Mask.shape[2]):
                     self.Mask[:, :, i] = morphology.binary_erosion(
-                        image=self.Mask[:, :, i], selem=morphology.disk(radius=3)
+                        image=self.Mask[:, :, i], footprint=morphology.disk(radius=3)
                     )
 
             self.Mask, nb_labels = ndimage.label(self.Mask)
@@ -224,11 +217,11 @@ class CtSeries(DicomSeries):
             self.Mask[self.Mask == central_blob] = 1
 
             if self.Mask.shape[2] > 2:
-                self.Mask = morphology.binary_dilation(image=self.Mask, selem=morphology.cube(width=3))
+                self.Mask = morphology.binary_dilation(image=self.Mask, footprint=morphology.cube(width=3))
             else:
                 for i in range(self.Mask.shape[2]):
                     self.Mask[:, :, i] = morphology.binary_dilation(
-                        image=self.Mask[:, :, i], selem=morphology.disk(radius=3)
+                        image=self.Mask[:, :, i], footprint=morphology.disk(radius=3)
                     )
 
         for i in range(self.Mask.shape[2]):
