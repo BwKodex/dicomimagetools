@@ -11,6 +11,7 @@ from scipy.ndimage import center_of_mass
 from skimage import morphology
 
 from ..helpers.check_path_is_valid import check_path_is_valid_path
+from ..helpers.normalize_dicom_exposure_parameters import get_xray_tube_current_in_ma
 from ..helpers.patient_centering import PatientGeometricalOffset, PatientMassCenter
 from ..helpers.pixel_data import get_pixel_array
 from ..helpers.voxel_data import VoxelData
@@ -136,15 +137,7 @@ class CtSeries(DicomSeries):
 
             self.ImageVolume[:, :, ind] = px
             self.kV.append(float(dcm.KVP))
-
-            if "XRayTubeCurrent" in dcm:
-                self.mA.append(float(dcm.XRayTubeCurrent))
-            elif "XRayTubeCurrentInmA" in dcm:
-                self.mA.append(float(dcm.XRayTubeCurrentInmA))
-            elif "XRayTubeCurrentInuA" in dcm:
-                self.mA.append(float(dcm.XRayTubeCurrentInuA) / 1000)
-            else:
-                self.mA.append(None)
+            self.mA.append(get_xray_tube_current_in_ma(dcm))
 
             self.SlicePosition.append(self._get_slice_position(dcm))
 
