@@ -190,11 +190,11 @@ class CtSeries(DicomSeries):
         if remove_table:
             # Remove the table by eroding and dilating the image volume
             if self.Mask.shape[2] > 2:
-                self.Mask = morphology.binary_erosion(image=self.Mask, selem=morphology.cube(width=3))
+                self.Mask = morphology.binary_erosion(image=self.Mask, footprint=morphology.cube(width=3))
             else:
                 for i in range(self.Mask.shape[2]):
                     self.Mask[:, :, i] = morphology.binary_erosion(
-                        image=self.Mask[:, :, i], selem=morphology.disk(radius=3)
+                        image=self.Mask[:, :, i], footprint=morphology.disk(radius=3)
                     )
 
             self.Mask, nb_labels = ndimage.label(self.Mask)
@@ -217,11 +217,11 @@ class CtSeries(DicomSeries):
             self.Mask[self.Mask == central_blob] = 1
 
             if self.Mask.shape[2] > 2:
-                self.Mask = morphology.binary_dilation(image=self.Mask, selem=morphology.cube(width=3))
+                self.Mask = morphology.binary_dilation(image=self.Mask, footprint=morphology.cube(width=3))
             else:
                 for i in range(self.Mask.shape[2]):
                     self.Mask[:, :, i] = morphology.binary_dilation(
-                        image=self.Mask[:, :, i], selem=morphology.disk(radius=3)
+                        image=self.Mask[:, :, i], footprint=morphology.disk(radius=3)
                     )
 
         for i in range(self.Mask.shape[2]):
