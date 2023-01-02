@@ -15,3 +15,12 @@ class VoxelData:
     x: float
     y: float
     z: Optional[float] = None
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y and self.z == other.z
+
+    def pixel_area(self) -> float:
+        return self.x * self.y
+
+    def volume(self) -> float:
+        return self.x * self.y * self.z
