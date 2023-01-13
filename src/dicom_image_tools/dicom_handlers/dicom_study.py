@@ -65,7 +65,7 @@ class DicomStudy:
             raise ValueError(f"The given DICOM file is not part of the study {self.StudyInstanceUid}")
 
         self.Manufacturer = dcm.Manufacturer
-        self.ManufacturerModelName = dcm.ManufacturerModelName
+        self.ManufacturerModelName = dcm.ManufacturerModelName if "ManufacturerModelName" in dcm else None
 
         if dcm.SOPClassUID in RADIATION_DOSE_STRUCTURED_REPORT_SOP_CLASS_UIDS + SECONDARY_CAPTURE_SOP_CLASS_UIDS:
             self.DoseReports.add_file(dataset=dcm)
