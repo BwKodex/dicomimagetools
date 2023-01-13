@@ -19,7 +19,7 @@ Install using pip by running:
 $ pip install dicom-image-tools
 ``
 
-Only **Python 3.9+** is supported.
+Only **Python 3.10+** is supported.
 
 See project wiki for more detailed documentation
 

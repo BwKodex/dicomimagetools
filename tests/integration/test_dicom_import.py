@@ -102,6 +102,16 @@ def test_import_dicom_file():
     assert len(dicom_study.Series[0].CompleteMetadata) == 1
 
 
+def test_import_dicom_file_should_accept_file_without_manufacturer_model_name():
+    file = Path(__file__).parent.parent / "test_data" / "io" / "iotest_no_manufacturer_model.dcm"
+
+    dicom_study = import_dicom_file(file=file)
+
+    assert isinstance(dicom_study, DicomStudy)
+    assert len(dicom_study.Series) == 1
+    assert len(dicom_study.Series[0].CompleteMetadata) == 1
+
+
 def test_import_dicom_file_raises_type_error():
     with pytest.raises(TypeError) as excinfo:
         # noinspection PyTypeChecker
