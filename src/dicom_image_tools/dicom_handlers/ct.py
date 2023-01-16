@@ -127,6 +127,8 @@ class CtSeries(DicomSeries):
         self.mA = []
         self.SlicePosition = []
         self.PatientMassCenterImage = []
+        self.VoxelData = []
+        self.CompleteMetadata = []
 
         for ind, fp in enumerate(self.FilePaths):
             dcm = pydicom.dcmread(fp=str(fp.absolute()))
