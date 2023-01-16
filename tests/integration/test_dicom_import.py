@@ -127,6 +127,42 @@ def test_import_dicom_file_should_accept_ct_files_without_manufacturer_model_nam
     assert len(dicom_study.Series[0].FilePaths) == 4
 
 
+def test_import_image_volume_should_replace_erase_series_data_before_appending_new_values():
+    # Arrange
+    filedir = Path(__file__).parent.parent / "test_data" / "ct_study" / "CtSeriesNoManufacturerModelName"
+
+    dicom_studies = import_dicom_from_folder(folder=filedir)
+    dicom_series = dicom_studies[list(dicom_studies.keys())[0]].Series[0]
+
+    images = len(dicom_series.FilePaths)
+
+    dicom_series.import_image_volume()
+
+    expected = [
+        len(dicom_series.kV),
+        len(dicom_series.mA),
+        len(dicom_series.CompleteMetadata),
+        len(dicom_series.VoxelData),
+        len(dicom_series.FilePaths),
+        dicom_series.ImageVolume.shape[2]
+    ]
+
+    # Act
+    dicom_series.import_image_volume()
+
+    actual = [
+        len(dicom_series.kV),
+        len(dicom_series.mA),
+        len(dicom_series.CompleteMetadata),
+        len(dicom_series.VoxelData),
+        len(dicom_series.FilePaths),
+        dicom_series.ImageVolume.shape[2]
+    ]
+
+    # Assert
+    assert actual == expected
+
+
 def test_import_dicom_file_raises_type_error():
     with pytest.raises(TypeError) as excinfo:
         # noinspection PyTypeChecker
