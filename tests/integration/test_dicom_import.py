@@ -112,6 +112,21 @@ def test_import_dicom_file_should_accept_file_without_manufacturer_model_name():
     assert len(dicom_study.Series[0].CompleteMetadata) == 1
 
 
+def test_import_dicom_file_should_accept_ct_files_without_manufacturer_model_name():
+    filedir = Path(__file__).parent.parent / "test_data" / "ct_study" / "CtSeriesNoManufacturerModelName"
+
+    dicom_studies = import_dicom_from_folder(folder=filedir)
+    keys = list(dicom_studies.keys())
+
+    assert len(keys) == 1
+
+    dicom_study = dicom_studies[list(dicom_studies.keys())[0]]
+
+    assert isinstance(dicom_study, DicomStudy)
+    assert len(dicom_study.Series) == 1
+    assert len(dicom_study.Series[0].FilePaths) == 4
+
+
 def test_import_dicom_file_raises_type_error():
     with pytest.raises(TypeError) as excinfo:
         # noinspection PyTypeChecker

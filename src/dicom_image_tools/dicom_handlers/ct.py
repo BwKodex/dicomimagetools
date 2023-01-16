@@ -109,7 +109,7 @@ class CtSeries(DicomSeries):
 
         super().add_file(file=file, dcm=dcm)
         self.Manufacturer = dcm.Manufacturer
-        self.ManufacturersModelName = dcm.ManufacturerModelName
+        self.ManufacturersModelName = dcm.ManufacturerModelName if "ManufacturerModelName" in dcm else None
         self.SlicePosition.append(self._get_slice_position(dcm))
 
         # Reorder lists according to slice positions
