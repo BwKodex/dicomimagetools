@@ -95,10 +95,14 @@ class ProjectionSeries(DicomSeries):
 
         if "PixelSpacing" in dcm:
             self.VoxelData.append(VoxelData(x=float(dcm.PixelSpacing[1]), y=float(dcm.PixelSpacing[0]), z=None))
-        else:
-            # Assume pixel size is set in Detector Element Spacing tag (0018, 7022)
+        elif "DetectorElementSpacing" in dcm:  # Tag (0018, 7022)
             self.VoxelData.append(
                 VoxelData(x=float(dcm.DetectorElementSpacing[1]), y=float(dcm.DetectorElementSpacing[0]), z=None)
+            )
+        else:
+            # Assume pixel size is 1.0x1.0
+            self.VoxelData.append(
+                VoxelData(x=1.0, y=1.0, z=None, unit="pixels")
             )
 
         self.kV.append(self._get_tag_value_as_float_or_none("KVP", ds=dcm))
