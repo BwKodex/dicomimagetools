@@ -10,6 +10,7 @@ from dicom_image_tools.dicom_handlers.dicom_import import (
 )
 from dicom_image_tools.dicom_handlers.dicom_study import DicomStudy
 from dicom_image_tools.dicom_handlers.dose_matrix import DoseMatrix
+from dicom_image_tools.helpers.voxel_data import VoxelData
 
 
 def test_import_dicom_from_file_should_parse_kv_ma_ms_tags():
@@ -110,6 +111,17 @@ def test_import_dicom_file_should_accept_file_without_manufacturer_model_name():
     assert isinstance(dicom_study, DicomStudy)
     assert len(dicom_study.Series) == 1
     assert len(dicom_study.Series[0].CompleteMetadata) == 1
+
+
+def test_import_dicom_file_should_set_voxel_size_to_1by1pixels_when_no_pixel_size_info():
+    file = Path(__file__).parent.parent / "test_data" / "io" / "iotest_no_detector_spacing.dcm"
+
+    dicom_study = import_dicom_file(file=file)
+
+    assert isinstance(dicom_study, DicomStudy)
+    assert len(dicom_study.Series) == 1
+    assert len(dicom_study.Series[0].CompleteMetadata) == 1
+    assert dicom_study.Series[0].VoxelData[0] == VoxelData(x=1, y=1, unit="pixels")
 
 
 def test_import_dicom_file_should_accept_ct_files_without_manufacturer_model_name():

@@ -15,9 +15,10 @@ class VoxelData:
     x: float
     y: float
     z: Optional[float] = None
+    unit: Optional[str] = "mm"
 
     def __eq__(self, other):
-        return self.x == other.x and self.y == other.y and self.z == other.z
+        return self.x == other.x and self.y == other.y and self.z == other.z and self.unit == other.unit
 
     def pixel_area(self) -> float:
         return self.x * self.y
