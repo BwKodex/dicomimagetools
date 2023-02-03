@@ -103,7 +103,7 @@ class DicomSeries:
         if metadata.PixelIntensityRelationshipSign == 1:
             return image
 
-        image = np.multiply(image - np.power(2, metadata.BitsStored), -1)
+        image = np.multiply(image - np.power(2, metadata.BitsAllocated), -1)
 
         return image
 
