@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 import pytest
@@ -12,3 +13,13 @@ IO_FILE_PATH1_SIRONA = Path(__file__).parent.parent / "test_data" / "io" / "iote
 def io_series_sirona() -> ProjectionSeries:
     io_study = import_dicom_file(IO_FILE_PATH1_SIRONA)
     return io_study.Series[0]
+
+
+@pytest.fixture(scope="session")
+def file_creation_dir() -> Path:
+    temp_dir = Path(__file__).parent / "Temptestfiles"
+    temp_dir.mkdir(exist_ok=False, parents=False)
+
+    yield temp_dir
+
+    shutil.rmtree(temp_dir)

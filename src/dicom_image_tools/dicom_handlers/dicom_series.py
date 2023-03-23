@@ -7,6 +7,7 @@ from plotly import graph_objects as go
 from pydicom import FileDataset
 
 from dicom_image_tools.plotting.colour_scales import plotly_colour_scales
+from .save_dicom import save_dicom
 
 from ..helpers.check_path_is_valid import check_path_is_valid_path
 from ..helpers.voxel_data import VoxelData
@@ -38,7 +39,7 @@ class DicomSeries:
         # Metadata
         self.SeriesInstanceUid: str = series_instance_uid
         self.SeriesDescription: Optional[str] = None
-        self.CompleteMetadata: List[Optional[FileDataset]] = []
+        self.CompleteMetadata: List[FileDataset] = []
         self.VoxelData: List[VoxelData] = []
         self.PixelIntensityNormalized: bool = False
 
@@ -141,3 +142,20 @@ class DicomSeries:
 
             if len(window) != 2 or any([not isinstance(val, (float, int)) for val in window]):
                 raise ValueError("The specified window must be a tuple of exactly 2 floats")
+
+    def save_image(self, image_index: int, output_path: Union[Path, str], bits_allocated: int = 16):
+        """Saves the image with the specified index to the specified output path
+
+        Args:
+            image_index: Index in the ImageVolume of the image that should be saved
+            output_path: The output filepath that the image should be saved to
+            bits_allocated: The number of bits to use when creating the pixel data
+        """
+        image: np.ndarray = (
+            self.ImageVolume[image_index].copy()
+            if isinstance(self.ImageVolume, list)
+            else self.ImageVolume[:, :, image_index].copy()
+        )
+
+        metadata: pydicom.FileDataset = self.CompleteMetadata[image_index]
+        save_dicom(image=image, metadata=metadata, output_path=output_path, bits_allocated=bits_allocated)
