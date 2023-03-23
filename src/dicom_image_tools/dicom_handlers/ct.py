@@ -419,3 +419,20 @@ class CtSeries(DicomSeries):
         return get_default_window_settings(
             metadata=self.CompleteMetadata[index], image_slice=self.ImageVolume[:, :, index], modality="ct"
         )
+
+    def save_image_volume_to_dicom_files(self, output_directory: Path, create_directory_if_not_exist: bool = True):
+        if not isinstance(output_directory, (str, Path)):
+            raise TypeError("The output directory must be a path")
+
+        output_directory: Path = Path(output_directory) if isinstance(output_directory, str) else output_directory
+
+        if create_directory_if_not_exist:
+            output_directory.mkdir(exist_ok=True, parents=True)
+
+        if not output_directory.exists() or not output_directory.is_dir():
+            raise ValueError("The specified output directory does not exist")
+
+        _ = [
+            self.save_image(image_index=ind, output_path=output_directory / f"{ind + 1}.dcm")
+            for ind in range(self.ImageVolume.shape[2])
+        ]
