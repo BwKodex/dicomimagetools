@@ -9,7 +9,7 @@ from dicom_image_tools.helpers.remove_position_indication_square import (
 def test_remove_position_indication_square_schick_sensor_image_removes_square_for_sirona_sensor(io_series_sirona):
     # Arrange
     expected = 3780
-    io_series_sirona.import_image(rotate_to_0_degerees=True)
+    io_series_sirona.import_image(rotate_to_0_degrees=True)
 
     # Act
     result = remove_position_indication_square_schick_sensor_image(
@@ -25,7 +25,7 @@ def test_remove_position_indication_square_schick_sensor_image_raises_NotImpleme
     io_series_sirona,
 ):
     # Arrange
-    io_series_sirona.import_image(rotate_to_0_degerees=True)
+    io_series_sirona.import_image(rotate_to_0_degrees=True)
     del io_series_sirona.CompleteMetadata[0].DetectorManufacturerName
 
     # Assert
@@ -39,7 +39,7 @@ def test_remove_position_indication_square_schick_sensor_image_raises_NotImpleme
     io_series_sirona,
 ):
     # Arrange
-    io_series_sirona.import_image(rotate_to_0_degerees=True)
+    io_series_sirona.import_image(rotate_to_0_degrees=True)
     io_series_sirona.CompleteMetadata[0].DetectorManufacturerName = "Unsupported Manufacturer"
 
     # Assert

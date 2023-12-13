@@ -131,14 +131,14 @@ class ProjectionSeries(DicomSeries):
 
         return float(tag_value)
 
-    def import_image(self, rotate_to_0_degerees: Optional[bool] = False) -> None:
+    def import_image(self, rotate_to_0_degrees: Optional[bool] = False) -> None:
         """Import the pixel data into the ImageVolume property"""
         self.ImageVolume = []
         for ind, fp in enumerate(self.FilePaths):
             dcm = pydicom.dcmread(str(fp.absolute()))
             pixel_array = get_pixel_array(dcm=dcm)
 
-            if rotate_to_0_degerees:
+            if rotate_to_0_degrees:
                 pixel_array = rotate_image(image=pixel_array, metadata=self.CompleteMetadata[ind])
 
             self.ImageVolume.append(pixel_array)
