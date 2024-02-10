@@ -176,6 +176,18 @@ class SquareRoi(Roi):
 
         return sem(image[self.UpperLeft.y : y2 + 1, self.UpperLeft.x : x2 + 1].flatten())
 
+    def get_coefficient_of_variation(self, image: np.ndarray) -> float:
+        """Calculates the coefficient of variation in the supplied image.
+
+        The coefficient of variation is defined as the ration of standard deviation to the mean.
+
+        :param image: Numpy ndarray containing the image
+        :return: The coefficient of variation as a float
+        """
+        x2, y2 = self._check_roi_placement(image=image)
+        image_part = image[self.UpperLeft.y : y2 + 1, self.UpperLeft.x : x2 + 1]
+        return float(np.std(image_part) / np.mean(image_part))
+
     def add_roi_to_image(self, image: np.ndarray, roi_color: str = "SkyBlue") -> np.ndarray:
         """Adds the ROI to the given image using the color specified.
 
