@@ -11,14 +11,15 @@ def image_with_negative_pixel_intensity_relationship():
     ds: Dataset = Dataset()
     ds.PixelIntensityRelationshipSign = -1
     ds.BitsStored = 12
+    ds.BitsAllocated = 16
 
     return {
         "image": np.array([[0, 0, 0], [2 ** 10, 2 ** 10, 2 ** 10]]),
         "normalized_image": np.multiply(
             np.array(
                 [
-                    [-(2 ** ds.BitsStored), -(2 ** ds.BitsStored), -(2 ** ds.BitsStored)],
-                    [2 ** 10 - 2 ** ds.BitsStored, 2 ** 10 - 2 ** ds.BitsStored, 2 ** 10 - 2 ** ds.BitsStored],
+                    [-(2 ** ds.BitsAllocated), -(2 ** ds.BitsAllocated), -(2 ** ds.BitsAllocated)],
+                    [2 ** 10 - 2 ** ds.BitsAllocated, 2 ** 10 - 2 ** ds.BitsAllocated, 2 ** 10 - 2 ** ds.BitsAllocated],
                 ]
             ),
             -1,

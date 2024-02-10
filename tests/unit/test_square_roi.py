@@ -221,6 +221,17 @@ def test_get_standard_error_of_them_mean_too_big_roi_no_resize():
         square_roi.get_std_error_of_the_mean(image=test_image)
 
 
+def test_get_coefficient_of_variation():
+    roi_values = test_image[5: 7 + 1, 5: 7 + 1]
+    expected = float(np.std(roi_values) / np.mean(roi_values))
+
+    center = dict(x=6, y=6, z=None)
+    voxel_data = VoxelData(x=1.0, y=1.0, z=None)
+    square_roi = SquareRoi(center=center, height=3, width=3, pixel_size=voxel_data)
+
+    assert expected == square_roi.get_coefficient_of_variation(image=test_image)
+
+
 def test_add_roi_to_image_unallowed_color():
     center = dict(x=6, y=6, z=None)
     voxel_data = VoxelData(x=1.0, y=1.0, z=None)
