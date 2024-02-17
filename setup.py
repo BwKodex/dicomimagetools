@@ -6,7 +6,7 @@ README = (Path(__file__).parent / "README.md").read_text()
 
 setup(
     name="dicom_image_tools",
-    version="24.2.0",
+    version="24.2.1",
     description="Python package for managing DICOM images from different modalities",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -24,7 +24,7 @@ setup(
     package_dir={"": "src"},
     install_requires=[
         "pydicom>=2.3.1",
-        "numpy>=1.24.0",
+        "numpy>=1.24.0,<2.0.0",
         "scikit-image>=0.17.2",
         "scipy>=1.9.3",
         "plotly>=5.11.0",
