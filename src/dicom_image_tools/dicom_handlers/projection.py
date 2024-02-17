@@ -207,7 +207,7 @@ class ProjectionSeries(DicomSeries):
     def show_image(
         self,
         index: int = 0,
-        rois: Optional[Roi] = None,
+        rois: Optional[List[Roi]] = None,
         colour_map: str = "bone",
         window: Optional[tuple[float, float]] = None,
         roi_only_borders: Optional[bool] = True,

@@ -121,7 +121,7 @@ class DicomSeries:
         if index < 0 or index > (len(self.FilePaths) - 1):
             raise ValueError("Invalid image index specified")
 
-        if rois is not None and (not isinstance(rois, list) or not all([isinstance(roi, list) for roi in rois])):
+        if rois is not None and (not isinstance(rois, list) or not all([isinstance(roi, Roi) for roi in rois])):
             raise TypeError("Only list of SquareRoi instances are implemented for plotting")
 
         ALLOWED_COLOUR_MAPS = list(plotly_colour_scales.keys())
