@@ -11,7 +11,6 @@ from .save_dicom import save_dicom
 
 from ..helpers.check_path_is_valid import check_path_is_valid_path
 from ..helpers.voxel_data import VoxelData
-from ..plotting.plotly import show_image
 from ..roi.roi import Roi
 
 

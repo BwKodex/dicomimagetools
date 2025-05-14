@@ -30,7 +30,7 @@ def test_import_dicom_from_file_should_parse_kv_ma_ms_tags():
 
 
 def test_import_dicom_from_folder_should_find_all_files_in_given_folder():
-    expected = 9
+    expected = 12
 
     folder = Path(__file__).parent.parent / "test_data"
 

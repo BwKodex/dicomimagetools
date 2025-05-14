@@ -138,7 +138,7 @@ class CtSeries(DicomSeries):
                 self.ImageVolume = np.empty((px.shape[0], px.shape[1], len(self.FilePaths)))
 
             self.ImageVolume[:, :, ind] = px
-            self.kV.append(float(dcm.KVP))
+            self.kV.append(float(dcm.KVP) if dcm.KVP else None)
             self.mA.append(get_xray_tube_current_in_ma(dcm))
 
             self.SlicePosition.append(self._get_slice_position(dcm))

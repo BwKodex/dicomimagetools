@@ -1,15 +1,81 @@
-[tool.pytest.ini_options]
-minversion = "6.0"
-testpaths = ["tests"]
+[project]
+name = "dicom_image_tools"
+version = "25.0.0"
+description = "Python package for managing DICOM images from different modalities"
+readme = {file = "README.md", content-type = "text/markdown"}
+license = "MIT"
+license-files = ["LICENSE.txt"]
+requires-python = ">=3.11"
+classifiers = [
+    "Intended Audience :: Developers",
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python :: 3"
+]
+authors = [
+    { name = "Josef Lundman", email = "josef@lundman.eu"}
+]
+maintainers = [
+    { name = "Josef Lundman", email = "josef@lundman.eu"}
+]
+dependencies = [
+    "pydicom>=2.3.1",
+    "numpy>=2.0.0",
+    "scikit-image>=0.17.2",
+    "scipy>=1.9.3",
+    "plotly>=5.11.0",
+    "python-gdcm>=3.0.20",
+]
 
 [tool.isort]
 profile = "black"
 multi_line_output = 3
 wrap_length = 79
-known_first_party = ["dicom_image_tools"]
+known_first_party = ["pyskindose"]
 sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 src_paths = ["src", "tests"]
 skip_glob = ["**/__init__.py", "**/migrations", ".venv", ".venv39", ".github", ".pytest_cache"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["dicom_image_tools*"]
+exclude = ["dicom_image_tools.egg-info*"]
+
+[build-system]
+requires = ["setuptools>=68.2.2"]
+build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = [
+    "coverage>=7.8.0",
+    "dicom-image-tools",
+    "livereload>=2.7.1",
+    "myst-parser>=4.0.1",
+    "pytest>=8.3.5",
+    "sphinx>=8.2.3",
+    "sphinx-rtd-theme>=3.0.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/BwKodex/dicomimagetools"
+Repository = "https://github.com/BwKodex/dicomimagetools"
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+dicom-image-tools = { workspace = true }
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]
 
 [tool.black]
 line-length = 120
@@ -36,6 +102,5 @@ exclude = '''
     | tools
     | pytest_cache
   )/
-  | manage.py
 )
 '''
