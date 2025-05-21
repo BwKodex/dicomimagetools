@@ -13,11 +13,12 @@ def get_xray_tube_current_in_ma(dcm: Union[FileDataset, Dataset]) -> Optional[fl
     Returns:
         The tube current converted to mA
     """
+
     if "XRayTubeCurrent" in dcm:
-        return float(dcm.XRayTubeCurrent)
+        return float(tmp) if (tmp := dcm.XRayTubeCurrent) else tmp
 
     if "XRayTubeCurrentInmA" in dcm:
-        return float(dcm.XRayTubeCurrentInmA)
+        return float(tmp) if (tmp := dcm.XRayTubeCurrentInmA) else tmp
 
     if "XRayTubeCurrentInuA" in dcm:
-        return float(dcm.XRayTubeCurrentInuA) / 1000
+        return (float(tmp) / 1000) if (tmp := dcm.XRayTubeCurrentInuA) else tmp

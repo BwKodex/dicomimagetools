@@ -46,4 +46,4 @@ def save_dicom(image: np.ndarray, metadata: pydicom.FileDataset, output_path: Un
 
     metadata.file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
 
-    pydicom.dcmwrite(filename=output_path, dataset=metadata)
+    pydicom.dcmwrite(output_path, metadata)
