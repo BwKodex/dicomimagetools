@@ -158,7 +158,7 @@ class CtSeries(DicomSeries):
 
     @staticmethod
     def _get_slice_position(dcm: FileDataset) -> float:
-        if "SliceLocation" in dcm:
+        if "SliceLocation" in dcm and dcm.SliceLocation is not None:
             return float(dcm.SliceLocation)
 
         if "ImagePositionPatient" in dcm:
