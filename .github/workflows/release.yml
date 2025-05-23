@@ -4,26 +4,34 @@ on:
   release:
     types: [created]
 
+env:
+  UV_SYSTEM_PYTHON: 1
+
 jobs:
   build-n-publish:
     name: Build an publish Python distributions to PyPI
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup python 3.13
-      uses: actions/setup-python@v2
+    - uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
       with:
-        python-version: 3.13
+        # Install a specific version of uv.
+        version: "0.7.7"
+
+    - name: Setup python
+      uses: actions/setup-python@v5
+      with:
+        python-version-file: pyproject.toml
+
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine
+      run: uv pip install setuptools wheel twine
+
     - name: Build a binary wheel and a source tarball
-      run: |
-        python setup.py sdist bdist_wheel
+      run: uv build sdist bdist_wheel
+
     - name: Publish distribution to PyPI
       if: startsWith(github.ref, 'refs/tags')
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        password: ${{ secrets.PYPI_DEPLOY_API_KEY }}
+      run: uv publish
